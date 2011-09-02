@@ -1,0 +1,34 @@
+#include "versionInfo.h"
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 0,0,0,1
+ PRODUCTVERSION 0,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040704e4"
+        BEGIN
+            VALUE "CompanyName", COMPANY_NAME
+            VALUE COPYRIGHT1, COPYRIGHT2
+            VALUE "FileDescription", FILE_DESC
+            VALUE "FileVersion", VERSION
+            VALUE "InternalName", INT_NAME
+            VALUE "OriginalFilename", ORIG_FNAME
+            VALUE "ProductName", PROD_NAME
+            VALUE "ProductVersion", VERSION
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1252
+    END
+END
