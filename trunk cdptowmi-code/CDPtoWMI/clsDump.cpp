@@ -1,7 +1,9 @@
 #include "clsDump.h"
 
 #define LINE_LEN 16
-
+#ifdef DEBUG
+	#define DEBUG_NIC 2
+#endif
 
 clsDump::clsDump() {
 	listen();
@@ -22,9 +24,13 @@ void clsDump::listen() {
 					else
 						printf(" (No description available)\n");
 			}
-			if (i == 3) { // testing correct adaptor REMOVE ME FOR PRODUCTION
+			#ifdef DEBUG 
+				if (i == DEBUG_NIC) { // Only listen to this adaptor (saves time when debugging)
+			#endif
 			listener(d);
-			} // testing correct adaptor REMOVE ME FOR PRODUCTION
+			#ifdef DEBUG 
+				} // Only listen to this adaptor
+			#endif
 		}
 		if (i == 0) {
 			printf("\nNo interfaces found! Make sure WinPcap is installed.\n");
