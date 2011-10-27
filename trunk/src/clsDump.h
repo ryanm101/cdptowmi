@@ -11,6 +11,14 @@
 #include <sstream>
 #include <string.h>
 
+#define LINE_LEN 16
+#ifdef DEBUG
+	/* Set to 99 to loop all interfaces otherwise set to the number 
+    *  belonging to the interface that CDP packets are expected on
+	*/
+	#define DEBUG_NIC 99 
+#endif
+
 class clsDump {
 	private:
 		pcap_if_t *alldevs; //List of all network adapators
