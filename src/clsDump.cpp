@@ -1,10 +1,5 @@
 #include "clsDump.h"
 
-#define LINE_LEN 16
-#ifdef DEBUG
-	#define DEBUG_NIC 2
-#endif
-
 clsDump::clsDump() {
 	listen();
 }
@@ -25,11 +20,11 @@ void clsDump::listen() {
 						printf(" (No description available)\n");
 			}
 			#ifdef DEBUG 
-				if (i == DEBUG_NIC) { // Only listen to this adaptor (saves time when debugging)
+				if ((i == DEBUG_NIC) || (DEBUG_NIC == 99)) { // Only listen to this adaptor (saves time when debugging)
 			#endif
 			listener(d);
 			#ifdef DEBUG 
-				} // Only listen to this adaptor
+				} // endif - only listen to this adaptor
 			#endif
 		}
 		if (i == 0) {
