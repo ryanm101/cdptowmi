@@ -17,7 +17,6 @@ void DisplayHelp() {
 	printf(APPNAME"\n");
 	printf(COPYRIGHT"\n");
 	printf(ABOUT"\n");
-
 }
 
 
