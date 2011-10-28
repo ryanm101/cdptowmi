@@ -16,7 +16,7 @@
 	/* Set to 99 to loop all interfaces otherwise set to the number 
     *  belonging to the interface that CDP packets are expected on
 	*/
-	#define DEBUG_NIC 99 
+	#define DEBUG_NIC 2 
 #endif
 
 class clsDump {

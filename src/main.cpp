@@ -2,13 +2,33 @@
 #include "main.h"
 using namespace std;
 
-int main(int argc, char** argv) {
-	wchar_t *cname = L"NINET_ORG_WMICDP";
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd) {
+	#ifdef DEBUG
+		RedirectIOToConsole();
+	#endif
 
-	if (argc > 1) { // Process Arguments.
+	int argc;
+	LPWSTR* szargv;
+	szargv = CommandLineToArgvW(GetCommandLineW(), &argc);
 
+	if( NULL == szargv ) {
+		wprintf(L"CommandLineToArgvW failed\n");
+		//return 0;
+	} else {
+		for( int i=0; i<argc; i++) {
+			printf("%d: %ws\n", i, szargv[i]);
+		}
 	}
-	clsWMI *wmi = new clsWMI(cname);
+
+	wchar_t *cname = L"NINET_ORG_WMICDP";
+	#ifdef DEBUG
+		clsWMI *wmi = new clsWMI(true);
+	#else
+		clsWMI *wmi = new clsWMI(false);
+	#endif
+
+
+	wmi->setClassName(cname);
 
 	clsDump Dump;
 	wmi->DeleteClass();

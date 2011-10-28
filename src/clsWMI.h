@@ -3,7 +3,6 @@
 
 #define _WIN32_DCOM
 
-//#include "clsCDP.h"
 #include "clsEthFrame.h"
 
 #include <pcap.h>
@@ -32,12 +31,12 @@ class clsWMI {
 	public:
 		clsWMI();
 		clsWMI(wchar_t *clsName);
+		clsWMI(bool wmidebug);
 		~clsWMI();
 		void Query();
 		int DeleteClass();
 		int CreateClass();
 		void CreateInstance(clsCDP *cdp);
-		
 		void setClassName(wchar_t *clsname);
 
 	private:

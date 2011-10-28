@@ -11,15 +11,16 @@ void clsDump::listen() {
 	int i=0;
 
 	if (getAdaptors() == 0 ) {
-		for(d= alldevs; d != NULL; d= d->next) { /* Print the list */
-			if (!d->flags & PCAP_IF_LOOPBACK) { /* Ignore loopback devices */
-					printf("%d. %s", ++i, d->name);
-					if (d->description)
-						printf(" (%s)\n\n", d->description);
-					else
-						printf(" (No description available)\n");
-			}
+		for(d= alldevs; d != NULL; d= d->next) { 
 			#ifdef DEBUG 
+				/* Print the list */
+				if (!d->flags & PCAP_IF_LOOPBACK) { /* Ignore loopback devices */
+						printf("%d. %s", ++i, d->name);
+						if (d->description)
+							printf(" (%s)\n\n", d->description);
+						else
+							printf(" (No description available)\n");
+				}
 				if ((i == DEBUG_NIC) || (DEBUG_NIC == 99)) { // Only listen to this adaptor (saves time when debugging)
 			#endif
 			listener(d);
@@ -102,7 +103,6 @@ int clsDump::listener(pcap_if_t *d) {
         /* If the interface is without addresses we suppose to be in a C class network */
         netmask=0xffffff; 
 
-
     //compile the filter
     if (pcap_compile(adhandle, &fcode, packet_filter, 1, netmask) <0 ) {
         fprintf(stderr,"\nUnable to compile the packet filter. Check the syntax.\n");
@@ -119,7 +119,9 @@ int clsDump::listener(pcap_if_t *d) {
         return -1;
 	}
 
-	printf("Waiting for 59 seconds...\n");
+	#ifdef DEBUG 
+		printf("Waiting for 59 seconds...\n");
+	#endif
 
     // Set a timer to wait for 10 seconds.
     if (!SetWaitableTimer(hTimer, &liDueTime, 0, NULL, NULL, 0))
@@ -129,8 +131,10 @@ int clsDump::listener(pcap_if_t *d) {
     }
 
     // Wait for the timer.
-
-	printf("\nlistening on %s...\n", d->description);
+	
+	#ifdef DEBUG 
+		printf("\nlistening on %s...\n", d->description);
+	#endif
 
 	/* start the capture */
     while((res = pcap_next_ex( adhandle, &header, &pkt_data)) >= 0) {
@@ -160,21 +164,23 @@ int clsDump::listener(pcap_if_t *d) {
 		clsCDP *cdp;
 		cdp = new clsCDP(&pkt_data, header->caplen, dtstr);
 		cdp->process();
-		cdp->print();
+		#ifdef DEBUG 
+			cdp->print();
+		#endif
 		lstCDP.push_back(cdp); 
     }
 
-	if(res == -1){
-        printf("Error reading the packets: %s\n", pcap_geterr(adhandle));
-        return -1;
-    }
+	#ifdef DEBUG 
+		if(res == -1){
+			printf("Error reading the packets: %s\n", pcap_geterr(adhandle));
+			return -1;
+		}
 
-	if(res == -2){
-        printf("pcap_breakloop() called \n");
-        return -2;
-    }
-
-    
+		if(res == -2){
+			printf("pcap_breakloop() called \n");
+			return -2;
+		}
+	#endif
 
 	return 0;
 }
