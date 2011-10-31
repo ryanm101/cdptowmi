@@ -22,16 +22,14 @@ class clsWMI {
 		IWbemLocator* pLoc;
 		IWbemContext* pCtx;
 		IWbemCallResult* pResult;
-		wchar_t *cname; // Class Name
-		int x; // Index counter
+		wchar_t *cname; // WMI Class Name
+		int x; // Instance Index counter
 		std::string *instProperties;
 		std::string dt;
 
 	// Methods
 	public:
 		clsWMI();
-		clsWMI(wchar_t *clsName);
-		clsWMI(bool wmidebug);
 		~clsWMI();
 		void Query();
 		int DeleteClass();

@@ -121,8 +121,6 @@ int clsCDP::processCDPHeader() {
 int clsCDP::processCDPPayload() { 
 	int pos = 0;
 
-	
-	
 	while(pos < (pktlen-12)) {
 		u_char *tmp = (u_char *) (pktdata+(26+pos));
 		u_short *tmp2 = (u_short*) (pktdata+(26+pos));

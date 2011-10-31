@@ -2,7 +2,6 @@
 #define __GUICON_H__
 // Code taken from http://dslweb.nwnexus.com/~ast/dload/guicon.htm
 
-#ifdef DEBUG
 	#include <windows.h>
 	#include <stdio.h>
 	#include <fcntl.h>
@@ -17,6 +16,5 @@
 	// maximum mumber of lines the output console should have
 	static const WORD MAX_CONSOLE_LINES = 500;
 	void RedirectIOToConsole();
-#endif
 
 #endif
