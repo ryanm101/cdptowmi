@@ -2,21 +2,8 @@
 
 clsWMI::clsWMI() {
 	x = 0;
-	_debug_ = false;
 	clsWMI::ConnectToWMI();
 };
-
-clsWMI::clsWMI(bool wmidebug) {
-	x = 0;
-	_debug_ = wmidebug;
-	clsWMI::ConnectToWMI();
-};
-
-clsWMI::clsWMI(wchar_t *clsName) {
-	x = 0;
-	clsWMI::cname = clsName;
-	clsWMI::ConnectToWMI();
-}
 
 clsWMI::~clsWMI() {}
 

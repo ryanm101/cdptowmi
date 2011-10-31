@@ -1,8 +1,6 @@
 #include "clsDump.h"
 
-clsDump::clsDump() {
-	listen();
-}
+clsDump::clsDump() {}
 
 clsDump::~clsDump() {}
 
@@ -12,24 +10,26 @@ void clsDump::listen() {
 
 	if (getAdaptors() == 0 ) {
 		for(d= alldevs; d != NULL; d= d->next) { 
-			#ifdef DEBUG 
-				/* Print the list */
-				if (!d->flags & PCAP_IF_LOOPBACK) { /* Ignore loopback devices */
-						printf("%d. %s", ++i, d->name);
-						if (d->description)
-							printf(" (%s)\n\n", d->description);
-						else
-							printf(" (No description available)\n");
+			if (_debug_) {
+				if (!d->flags & PCAP_IF_LOOPBACK) { // Ignore loopback devices 
+					printf("%d. %s", ++i, d->name);
+					if (d->description) {
+						printf(" (%s)\n\n", d->description);
+					} else {
+						printf(" (No description available)\n");
+					}
 				}
-				if ((i == DEBUG_NIC) || (DEBUG_NIC == 99)) { // Only listen to this adaptor (saves time when debugging)
-			#endif
-			listener(d);
-			#ifdef DEBUG 
-				} // endif - only listen to this adaptor
-			#endif
+			}
+			if (_debug_) {
+				if ((i == DEBUG_NIC) || (DEBUG_NIC == 99)) {
+					listener(d);
+				}
+			} else {
+				listener(d);
+			}
 		}
 		if (i == 0) {
-			printf("\nNo interfaces found! Make sure WinPcap is installed.\n");
+			if (_debug_) printf("\nNo interfaces found! Make sure WinPcap is installed.\n");
 		}
 	}
     pcap_freealldevs(alldevs);
@@ -40,7 +40,7 @@ int clsDump::getAdaptors() {
     
     /* Get device list from local machine */
     if (pcap_findalldevs_ex(PCAP_SRC_IF_STRING, NULL, &alldevs, errbuf) == -1) {
-        fprintf(stderr,"Error in pcap_findalldevs_ex: %s\n", errbuf);
+        if (_debug_) fprintf(stderr,"Error in pcap_findalldevs_ex: %s\n", errbuf);
         return 1;
     }
 	return 0;
@@ -69,7 +69,7 @@ int clsDump::listener(pcap_if_t *d) {
     hTimer = CreateWaitableTimer(NULL, TRUE, NULL);
     if (NULL == hTimer)
     {
-        printf("CreateWaitableTimer failed (%d)\n", GetLastError());
+        if (_debug_) printf("CreateWaitableTimer failed (%d)\n", GetLastError());
         return 1;
     }
 
@@ -82,7 +82,7 @@ int clsDump::listener(pcap_if_t *d) {
                               NULL,             // authentication on the remote machine
                               errbuf            // error buffer
                               ) ) == NULL) {
-        fprintf(stderr,"\nUnable to open the adapter. %s is not supported by WinPcap\n", d->name);
+        if (_debug_) fprintf(stderr,"\nUnable to open the adapter. %s is not supported by WinPcap\n", d->name);
         /* Free the device list */
         pcap_freealldevs(alldevs);
         return -1;
@@ -90,7 +90,7 @@ int clsDump::listener(pcap_if_t *d) {
 
 	 /* Check the link layer. We support only Ethernet for simplicity. */
     if(pcap_datalink(adhandle) != DLT_EN10MB) {
-        fprintf(stderr,"\nThis program works only on Ethernet networks.\n");
+        if (_debug_) fprintf(stderr,"\nThis program works only on Ethernet networks.\n");
         /* Free the device list */
         pcap_freealldevs(alldevs);
         return -1;
@@ -105,7 +105,7 @@ int clsDump::listener(pcap_if_t *d) {
 
     //compile the filter
     if (pcap_compile(adhandle, &fcode, packet_filter, 1, netmask) <0 ) {
-        fprintf(stderr,"\nUnable to compile the packet filter. Check the syntax.\n");
+        if (_debug_) fprintf(stderr,"\nUnable to compile the packet filter. Check the syntax.\n");
         /* Free the device list */
         pcap_freealldevs(alldevs);
         return -1;
@@ -113,28 +113,24 @@ int clsDump::listener(pcap_if_t *d) {
     
     //set the filter
     if (pcap_setfilter(adhandle, &fcode)<0) {
-        fprintf(stderr,"\nError setting the filter.\n");
+        if (_debug_) fprintf(stderr,"\nError setting the filter.\n");
         /* Free the device list */
         pcap_freealldevs(alldevs);
         return -1;
 	}
 
-	#ifdef DEBUG 
-		printf("Waiting for 59 seconds...\n");
-	#endif
+	if (_debug_) printf("Waiting for 59 seconds...\n");
 
     // Set a timer to wait for 10 seconds.
     if (!SetWaitableTimer(hTimer, &liDueTime, 0, NULL, NULL, 0))
     {
-        printf("SetWaitableTimer failed (%d)\n", GetLastError());
+        if (_debug_) printf("SetWaitableTimer failed (%d)\n", GetLastError());
         return 2;
     }
 
     // Wait for the timer.
 	
-	#ifdef DEBUG 
-		printf("\nlistening on %s...\n", d->description);
-	#endif
+	if (_debug_) printf("\nlistening on %s...\n", d->description);
 
 	/* start the capture */
     while((res = pcap_next_ex( adhandle, &header, &pkt_data)) >= 0) {
@@ -164,13 +160,11 @@ int clsDump::listener(pcap_if_t *d) {
 		clsCDP *cdp;
 		cdp = new clsCDP(&pkt_data, header->caplen, dtstr);
 		cdp->process();
-		#ifdef DEBUG 
-			cdp->print();
-		#endif
+		if (_debug_) cdp->print();
 		lstCDP.push_back(cdp); 
     }
 
-	#ifdef DEBUG 
+	if (_debug_) {
 		if(res == -1){
 			printf("Error reading the packets: %s\n", pcap_geterr(adhandle));
 			return -1;
@@ -180,7 +174,7 @@ int clsDump::listener(pcap_if_t *d) {
 			printf("pcap_breakloop() called \n");
 			return -2;
 		}
-	#endif
+	}
 
 	return 0;
 }

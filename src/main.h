@@ -4,10 +4,7 @@
 #include "clsDump.h"
 #include "clsEthFrame.h"
 #include "clsWMI.h"
-
-#ifdef DEBUG
-	#include "guicon.h"
-#endif
+#include "guicon.h"
 
 #include <windows.h>
 #include <stdlib.h>

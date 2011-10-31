@@ -1,5 +1,4 @@
 // Code taken from http://dslweb.nwnexus.com/~ast/dload/guicon.htm
-#ifdef DEBUG
 
 	#include "guicon.h"
 
@@ -45,4 +44,3 @@
 		ios::sync_with_stdio();
 
 	}
-#endif

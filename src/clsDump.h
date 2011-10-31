@@ -12,26 +12,23 @@
 #include <string.h>
 
 #define LINE_LEN 16
-#ifdef DEBUG
-	/* Set to 99 to loop all interfaces otherwise set to the number 
-    *  belonging to the interface that CDP packets are expected on
-	*/
-	#define DEBUG_NIC 2 
-#endif
+#define DEBUG_NIC 2 // # of interface to listen on (99 listens on all interfaces)
 
 class clsDump {
+	/* Variables */
 	private:
 		pcap_if_t *alldevs; //List of all network adapators
 		pcap_if_t *conDevs; // Network adaptors with an active connection
 
 	public:
 		std::list<clsCDP*> lstCDP;	//List of all CDP Packets captured & processed.
+		bool _debug_;
 
+	/* Methods */
 	public:
 		clsDump();
 		~clsDump();
 		void listen();
-		
 
 	private:
 		int getAdaptors();
