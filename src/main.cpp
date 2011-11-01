@@ -34,10 +34,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	clsDump *Dump = new clsDump();
 	Dump->_debug_ = _debug_;
-	if(from_string<int>(Dump->nic_int, args["Interface"], std::hex)) {
-		std::cout << Dump->nic_int << std::endl;
-	} else {
-		std::cout << "from_string failed" << std::endl;
+	if(!from_string<int>(Dump->nic_int, args["Interface"], std::hex)) {
+		if (_debug_) printf("from_string failed\n");
+		Dump->nic_int = -1;
 	}
 	
 	Dump->listen();
