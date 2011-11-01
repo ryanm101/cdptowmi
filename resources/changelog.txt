@@ -1,0 +1,10 @@
+CDPtoWMI Changelog
+
+
+
+0.0.0.2: 2011-11-01
+- Commandline arguments now work
+- Added guiconsole for debug mode
+- prevented popup console appearing when application is run
+- added file and versioning info to the exe. 
+- general fixes to broken code and cleanup.

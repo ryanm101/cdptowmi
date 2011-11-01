@@ -105,6 +105,10 @@
     <ClCompile Include="..\src\guicon.cpp" />
     <ClCompile Include="..\src\main.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\resources\changelog.txt" />
+    <None Include="..\resources\sms_def.mof" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
