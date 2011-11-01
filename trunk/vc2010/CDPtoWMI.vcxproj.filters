@@ -62,4 +62,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\resources\sms_def.mof">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\resources\changelog.txt">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>
