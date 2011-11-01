@@ -1,0 +1,15 @@
+//  <:[-<>>>>>>>>>>>>>>>>>>>>>>Begin>>-NINet.org CDPtoWMI-<<Begin<<<<<<<<<<<<<<<<<<<<<<>=]:>
+#pragma namespace ("\\\\.\\root\\cimv2\\SMS")
+//#pragma namespace ("\\\\.\\root\\cimv2")
+[ SMS_Report      (TRUE), 
+  SMS_Group_Name  ("NINet.org CDP to WMI"), 
+  SMS_Class_ID    ("CUSTOM|NINET_ORG_WMICDP|1.0") ]
+class NINET_ORG_WMICDP : SMS_Class_Template
+{
+  [SMS_Report(FALSE), Key] string Index;
+  [SMS_Report(TRUE)] string TimeStamp;
+  [SMS_Report(TRUE)] string Platform;
+  [SMS_Report(TRUE)] string DeviceID;
+  [SMS_Report(TRUE)] string PortID;
+};
+//  <:[-<>>>>>>>>>>>>>>>>>>>>>>End>>-NINet.org CDPtoWMI-<<END<<<<<<<<<<<<<<<<<<<<<<>=]:>
