@@ -7,13 +7,13 @@
 #define VERSION         "0.0.0.1"
 #endif
 
-#define FILE_VERSION	"" VERSION " English"
+#define FILE_VERSION	VERSION
 #define COMMENTS		""
-#define COMPANY_NAME	"Ryan McLean"
-#define FILE_DESC		"SCCM CDP to WMI " VERSION ""
-#define INT_NAME		"CDPtoWMI.exe"
-#define ORIG_FNAME		"CDPtoWMI.exe"
-#define PROD_NAME		"SCCM CDP to WMI " VERSION ""
+#define COMPANY_NAME	"NINet.org"
+#define FILE_DESC		"CDP to WMI " VERSION ""
+#define INT_NAME		"cdptowmi.exe"
+#define ORIG_FNAME		INT_NAME
+#define PROD_NAME		"CDP to WMI " VERSION ""
 #define LEG_COPY		"Copyright (C) 2011 Ryan McLean"
 #define LEG_TM			"CDPtoWMI"
 
