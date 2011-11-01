@@ -1,6 +1,9 @@
 #include "clsDump.h"
 
-clsDump::clsDump() {}
+clsDump::clsDump() {
+	nic_int = -1;
+	_debug_ = false;
+}
 
 clsDump::~clsDump() {}
 
@@ -20,13 +23,23 @@ void clsDump::listen() {
 					}
 				}
 			}
-			if (_debug_) {
+			
+			#ifdef DEBUG
 				if ((i == DEBUG_NIC) || (DEBUG_NIC == 99)) {
 					listener(d);
 				}
-			} else {
-				listener(d);
-			}
+			#else
+				if (nic_int != -1) {
+					while (i < nic_int) { // loop until we get to the nic we care about.
+						d= d->next;
+						i++;
+					} 
+					listener(d);
+					break;
+				} else {
+					listener(d);
+				}
+			#endif
 		}
 		if (i == 0) {
 			if (_debug_) printf("\nNo interfaces found! Make sure WinPcap is installed.\n");

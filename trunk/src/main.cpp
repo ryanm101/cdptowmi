@@ -1,5 +1,5 @@
-/**/
 #include "main.h"
+
 using namespace std;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd) {
@@ -11,18 +11,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		bool _debug_ = false;
 	#endif
 	
-	int argc;
-	LPWSTR* szargv;
-	szargv = CommandLineToArgvW(GetCommandLineW(), &argc);
+	map<string,string> args;
+	args["Debug"] = "false";
+	args["DryRun"] = "false";
+	args["Interface"] = "-1";
+	processargs(__argc,__argv,_debug_, args);
 
-	if( NULL == szargv ) {
-		if (_debug_) wprintf(L"CommandLineToArgvW failed\n");
-		return 1;
-	} else {
-		for( int i=0; i<argc; i++) {
-			if (_debug_) printf("%d: %ws\n", i, szargv[i]);
-		}
-	}
+	if (strcmp(args["Debug"].c_str(),"true") == 0) _debug_ = true;
 
 	#ifndef DEBUG 
 		/* If we are debugging this is already enabled, 
@@ -39,14 +34,31 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	clsDump *Dump = new clsDump();
 	Dump->_debug_ = _debug_;
+	if(from_string<int>(Dump->nic_int, args["Interface"], std::hex)) {
+		std::cout << Dump->nic_int << std::endl;
+	} else {
+		std::cout << "from_string failed" << std::endl;
+	}
+	
 	Dump->listen();
 
-	wmi->DeleteClass();
-	wmi->CreateClass();
+	if (strcmp(args["DryRun"].c_str(),"true") != 0) {
+		wmi->DeleteClass();
+		wmi->CreateClass();
 
-	while(!Dump->lstCDP.empty()) {
-		wmi->CreateInstance(Dump->lstCDP.front());
-		Dump->lstCDP.pop_front();
+		while(!Dump->lstCDP.empty()) {
+			wmi->CreateInstance(Dump->lstCDP.front());
+			Dump->lstCDP.pop_front();
+		}
+	} else {
+		if (_debug_) printf("DryRun: Delete WMI Class\n");
+		if (_debug_) printf("DryRun: Create WMI Class - %s\n", cname);
+		while(!Dump->lstCDP.empty()) {
+			if (_debug_) printf("DryRun: Add Instance");
+			Dump->lstCDP.pop_front();
+		}
+		if (_debug_) printf("DryRun: Done");
+		if (_debug_) system("pause");
 	}
 
 	#ifdef DEBUG // For test runs we delete the class as soon as we are finished. 
