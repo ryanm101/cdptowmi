@@ -22,6 +22,7 @@ class clsDump {
 
 	public:
 		std::list<clsCDP*> lstCDP;	//List of all CDP Packets captured & processed.
+		int nic_int;
 		bool _debug_;
 
 	/* Methods */

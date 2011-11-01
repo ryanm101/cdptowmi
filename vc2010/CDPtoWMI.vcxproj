@@ -45,7 +45,7 @@
     <IntDir>..\builds\intermediate\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)\..\builds\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)..\builds\$(Configuration)\</OutDir>
     <IntDir>..\builds\intermediate\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
