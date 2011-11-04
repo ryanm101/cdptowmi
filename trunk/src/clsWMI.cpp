@@ -62,7 +62,6 @@ int clsWMI::ConnectToWMI() {
     // to make IWbemServices calls.
 
     hres = pLoc->ConnectServer(
-        
         _bstr_t(L"ROOT\\CIMV2"), // WMI namespace
         NULL,                    // User name
         NULL,                    // User password

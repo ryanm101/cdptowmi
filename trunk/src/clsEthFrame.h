@@ -9,6 +9,7 @@
 #include <list>
 
 class clsCDPData;
+class clsCDPIP;
 
 class clsFRAME {
 	protected:
@@ -51,7 +52,9 @@ class clsCDP: public clsFRAME {
 		u_char version;			// 1 byte   - Version of CDP being used
 		u_char ttl;				// 1 byte   - Time to Live
 		u_short crc;			// 2 bytes  - Checksum
+		u_int IPCount;			// 4 bytes - Number of IPs in Packet
 		std::list<clsCDPData> lstCDPData;  // Variable Data gathered by type
+		std::list<clsCDPIP> lstCDPIPs;  // Variable IP Data gathered by type
 
 	public:
 		/* Constructors & Destructor */
@@ -61,12 +64,13 @@ class clsCDP: public clsFRAME {
 		/* Methods */
 		int process();
 		void print();
-		std::string getTS();
+		std::string getTS(); // Get Timestamp
 
 	private:
 		int processCDPHeader();
 		int processCDPPayload();
 		int processType(u_short datatype, u_short len, u_char *data);
+		std::string GetProtocol(u_char ID);
 };
 
 class clsCDPData {
@@ -79,6 +83,21 @@ class clsCDPData {
 		clsCDPData();
 		~clsCDPData();
 		std::string To_str();
+};
+
+class clsCDPIP {
+	public:
+		u_short Type;		// 2 bytes (management IP, etc.)
+		u_char ProtoType;	// 1 byte
+		u_char ProtoLen;	// 1 byte
+		u_char Protocol;	// 1 byte
+		u_short AddrLen;	// 2 bytes
+		u_char *Addr;		// 4 bytes
+
+	public:
+		clsCDPIP();
+		~clsCDPIP();
+		std::string getIP();
 };
 
 #endif
