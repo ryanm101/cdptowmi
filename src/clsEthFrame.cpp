@@ -89,12 +89,14 @@ void clsFRAME::print() {
 	printf("PID:           0x%02X\n",			PID);
 }
 
+// Constructors & Destructor
 clsCDP::clsCDP(const u_char** data, int len, std::string dt) { 
 	pktdata = *data;
 	capLen = len;
 	cimdt = dt;
 }
 
+// Methods
 int clsCDP::process() { 
 	int result;
 	result = processEthHeader();
@@ -120,6 +122,7 @@ int clsCDP::processCDPHeader() {
 
 int clsCDP::processCDPPayload() { 
 	int pos = 0;
+	int numIP = 0;
 
 	while(pos < (pktlen-12)) {
 		u_char *tmp = (u_char *) (pktdata+(26+pos));
@@ -128,21 +131,103 @@ int clsCDP::processCDPPayload() {
 
 		cdpdata->Type = ntohs(*tmp2);
 		cdpdata->Length = ntohs(*(tmp2+(1)));
-
 		cdpdata->Data = new u_char[cdpdata->Length-4];
 
 		for(int i = 0; i < (cdpdata->Length - 3); i++) {
 			cdpdata->Data[i] =  *(tmp+4+i);
 		}
 
-		lstCDPData.push_back(*cdpdata);
+		lstCDPData.push_back(*cdpdata);	
+
+		if ((cdpdata->Type == ADDRESSES) || (cdpdata->Type == MGMTADDRESSES)) {
+			/* length of address data is 17 total for 1 address, 
+			/* Type = 2bytes
+			/* Length = 2Bytes
+			/* Number of IP addresses = 4Bytes
+			/* 9 Bytes per IPv4 IP,
+			/* Protocol Type = 1Byte
+			/* Protocol Len = 1Byte
+			/* Protocol = 1Byte
+			/* Address Length = 2Bytes
+			/* IPv4 Address = 4Bytes
+			 */
+			numIP = 0;
+			clsCDPIP *cdpip = new clsCDPIP();
+
+			numIP = (int) (ntohs(*(tmp2+(2))) + ntohs(*(tmp2+(3)))); // we need 4Bytes but ntohs() only works on 2Bytes at time
+
+			for(int i = 0; i < numIP; i++) {
+				cdpip->Type = cdpdata->Type;
+				cdpip->ProtoType = *(tmp+(8+i));
+				cdpip->ProtoLen = *(tmp+(9+i));
+				cdpip->Protocol = *(tmp+(10+i));
+				cdpip->AddrLen = (*(tmp+(12+i)) + *(tmp+(11+i))); // As we are dealing with individual bytes just retrieve in correct ordered instead of calling ntohs().
+
+				cdpip->Addr = new u_char[cdpip->AddrLen+1];
+				memset(&cdpip->Addr[0], 0, sizeof(cdpip->Addr+1));
+				for(int x = 0;x < cdpip->AddrLen; x++) {
+					cdpip->Addr[x] = *(tmp+(13+x+i));
+				}
+				lstCDPIPs.push_back(*cdpip);
+			}
+		}
 		pos += (cdpdata->Length);
 	}
 
 	return 0;
 }
 
+std::string clsCDP::GetProtocol(u_char ID) {
+	std::string tmp;
+	switch(ID) {
+		case PROTO_NULL:
+			tmp = "NULL";
+			break;
+		case PROTO_Q933:
+			tmp = "Q.933";
+			break;
+		case PROTO_IEEESNAP:
+			tmp = "IEEE SNAP";
+			break;
+		case PROTO_ISOCLNP:
+			tmp = "ISO CLNP (Connectionless Network Protocol)";
+			break;
+		case PROTO_ISOESIS:
+			tmp = "ISO ES-IS";
+			break;
+		case PROTO_ISIS:
+			tmp = "IS-IS";
+			break;
+		case PROTO_IPV6:
+			tmp = "IPv6";
+			break;
+		case PROTO_FRF9:
+			tmp = "FRF.9";
+			break;
+		case PROTO_FRF12:
+			tmp = "FRF.12";
+			break;
+		case PROTO_TRILL:
+			tmp = "TRILL";
+			break;
+		case PROTO_IEEE8021AQ:
+			tmp = "IEEE 802.1aq";
+			break;
+		case PROTO_IPV4:
+			tmp = "IPv4";
+			break;
+		case PROTO_PPP:
+			tmp = "PPP";
+			break;
+		default:
+			tmp = "Unknown";
+			break;
+	}
+	return tmp;
+}
+
 void clsCDP::print() {
+	int numIP = 0;
 	printf("\n---- Ethernet Header ----\n");
 	printf("Destination:   %02X:%02X:%02X:%02X:%02X:%02X\n", 
 			Destination[0],	Destination[1],	Destination[2],	Destination[3],
@@ -173,7 +258,19 @@ void clsCDP::print() {
 				printf("Device ID:             %s\n", it->To_str().c_str());
 				break;
 			case ADDRESSES:
-				//printf("XXXXXX:                %s\n", it->To_str().c_str());
+				numIP = 0; 
+				for (std::list<clsCDPIP>::iterator itip = lstCDPIPs.begin(); itip != lstCDPIPs.end(); itip++) {
+					if (itip->Type == ADDRESSES) {
+						printf("IP Address%d:           %s\n", numIP,itip->getIP().c_str());
+						if (itip->ProtoType == PROTOT_NLPID) {
+							printf("-Protocol Type:        NLPID\n");
+						} else {
+							printf("-Protocol Type:             Unknown\n");
+						}
+						printf("-Protocol:             %s\n",GetProtocol(itip->Protocol).c_str());
+						numIP++;
+					}
+				}
 				break;
 			case PORTID:
 				printf("Connected to:          %s\n", it->To_str().c_str());
@@ -209,7 +306,19 @@ void clsCDP::print() {
 				//printf("Untrusted port CoS:    %s\n", it->To_str().c_str());
 				break;
 			case MGMTADDRESSES:
-				//printf("Management Addresses:  %s\n", it->To_str().c_str());
+				numIP = 0; 
+				for (std::list<clsCDPIP>::iterator itip = lstCDPIPs.begin(); itip != lstCDPIPs.end(); itip++) {
+					if (itip->Type == MGMTADDRESSES) {
+						printf("Management Address%d:           %s\n", numIP,itip->getIP().c_str());
+						if (itip->ProtoType == PROTOT_NLPID) {
+							printf("-Protocol Type:        NLPID\n");
+						} else {
+							printf("-Protocol Type:             Unknown\n");
+						}
+						printf("-Protocol:             %s\n",GetProtocol(itip->Protocol).c_str());
+						numIP++;
+					}
+				}
 				break;
 			case POWERAVAILABLE:
 				//printf("Power Available:       %s\n", it->To_str().c_str());
@@ -220,19 +329,50 @@ void clsCDP::print() {
 	}
 }
 
+
 std::string clsCDP::getTS() {
 	return cimdt.c_str();
 }
 
+// Constructors & Destructor
 clsCDPData::clsCDPData() {}
 
 clsCDPData::~clsCDPData() {}
 
+// Methods
 std::string clsCDPData::To_str() {
 	u_short count = (Length - 4);
 	std::string tmp;
 	for (int i = 0; i < count; i++) {
 		tmp += (char) Data[i];
+	}
+	return tmp;
+}
+
+// Constructors & Destructor
+clsCDPIP::clsCDPIP() {}
+
+clsCDPIP::~clsCDPIP() {}
+
+//Methods
+std::string clsCDPIP::getIP() {
+	std::string tmp;
+	if (Protocol == PROTO_IPV4) {
+		u_char t;
+		char t2[4];
+		memset(&t2, 0, 4);
+		int x;
+		for (int i = 0; i < AddrLen; i++) {
+			t = Addr[i];
+			x = (int) t;
+			_itoa_s(x,t2,sizeof(x),10);
+			tmp += t2;
+			if (i < (AddrLen -1)) {
+				tmp += ".";
+			}
+		}
+	} else {
+		tmp = "Unknown - Not IPv4";
 	}
 	return tmp;
 }
