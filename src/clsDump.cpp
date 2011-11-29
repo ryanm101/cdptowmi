@@ -3,6 +3,7 @@
 clsDump::clsDump() {
 	nic_int = -1;
 	_debug_ = false;
+	use_guid_list = false;
 }
 
 clsDump::~clsDump() {}
@@ -26,7 +27,23 @@ void clsDump::listen() {
 			
 			#ifdef DEBUG
 				if ((i == DEBUG_NIC) || (DEBUG_NIC == 99)) {
-					listener(d);
+					if (WMI_NICGUID.empty()) {
+						listener(d); // Listen on all for now
+					} else {
+						std::string tmp;
+						while (d != NULL) { // loop until we get to the nic(s) we care about.
+							for(std::list<std::string>::iterator it = WMI_NICGUID.begin(); it != WMI_NICGUID.end(); ++it) {
+								tmp = "rpcap://\\Device\\NPF_";
+								tmp.append((*it));
+								if (tmp.compare(d->name) == 0) {
+									listener(d);
+									break;
+								} 
+							}
+							d= d->next;
+						} 
+						break;
+					}
 				}
 			#else
 				if (nic_int != -1) {

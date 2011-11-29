@@ -1,11 +1,15 @@
 #include "clsWMI.h"
 
 clsWMI::clsWMI() {
-	x = 0;
+	intInstIndex = 0;
 	clsWMI::ConnectToWMI();
 };
 
-clsWMI::~clsWMI() {}
+clsWMI::~clsWMI() {
+    pSvc->Release();
+    pLoc->Release();     
+    CoUninitialize();
+}
 
 void clsWMI::setClassName(wchar_t *clsname) {
 	cname = clsname;
@@ -83,84 +87,26 @@ int clsWMI::ConnectToWMI() {
 	return 0;
 }
 
-void clsWMI::Query() {
+void clsWMI::getNICs(std::string name) {
+	std::string strqry = "SELECT * FROM Win32_NetworkAdapter WHERE NetEnabled = True AND NetConnectionID like '";
+	strqry.append(name);
+	strqry.append("'");
+	std::string arrFields[] = {"NetConnectionID","Name","GUID"};
+	Query(strqry,arrFields);
+}
+
+void clsWMI::getNICs() {
+	std::string strqry = "SELECT * FROM Win32_NetworkAdapter WHERE NetEnabled = True";
+	std::string arrFields[] = {"NetConnectionID","Name","GUID"};
+	Query(strqry,arrFields);
+}
+
+void clsWMI::Query(std::string strqry, std::string arrProp[]) {
 	HRESULT hres;
 	bstr_t qryLang;
-	bstr_t qry;
-	qry = "SELECT * FROM Win32_NetworkAdapter WHERE NetEnabled = True";
+	bstr_t qry(strqry.c_str());
 	qryLang = "WQL";
 
-
-	clsWMI::ConnectToWMI();
-
-    hres = CoCreateInstance(
-        CLSID_WbemLocator,             
-        0, 
-        CLSCTX_INPROC_SERVER, 
-        IID_IWbemLocator, (LPVOID *) &pLoc);
- 
-    if (FAILED(hres))
-    {
-        printf("Failed to create IWbemLocator object. Error code = %X\n", hres);
-        CoUninitialize();
-        exit(3);       // Program has failed.
-    }
-
-    pSvc = 0;
-
-    // Connect to the root\cimv2 namespace with the
-    // current user and obtain pointer pSvc
-    // to make IWbemServices calls.
-
-    hres = pLoc->ConnectServer(
-        
-        _bstr_t(L"ROOT\\CIMV2"), // WMI namespace
-        NULL,                    // User name
-        NULL,                    // User password
-        0,                       // Locale
-        NULL,                    // Security flags                 
-        0,                       // Authority       
-        0,                       // Context object
-        &pSvc                    // IWbemServices proxy
-        );                              
-    
-    if (FAILED(hres))
-    {
-        printf("Could not connect. Error code = %X\n", hres);
-        pLoc->Release();     
-        CoUninitialize();
-        exit(4);                // Program has failed.
-    }
-
-    printf("Connected to ROOT\\CIMV2 WMI namespace\n");
-
-    // Set the IWbemServices proxy so that impersonation
-    // of the user (client) occurs.
-    hres = CoSetProxyBlanket(
-       
-       pSvc,                         // the proxy to set
-       RPC_C_AUTHN_WINNT,            // authentication service
-       RPC_C_AUTHZ_NONE,             // authorization service
-       NULL,                         // Server principal name
-       RPC_C_AUTHN_LEVEL_CALL,       // authentication level
-       RPC_C_IMP_LEVEL_IMPERSONATE,  // impersonation level
-       NULL,                         // client identity 
-       EOAC_NONE                     // proxy capabilities     
-    );
-
-    if (FAILED(hres))
-    {
-        printf("Could not set proxy blanket. Error code = %X\n", hres);
-        pSvc->Release();
-        pLoc->Release();     
-        CoUninitialize();
-        exit(5);               // Program has failed.
-    }
-
-    // Use the IWbemServices pointer to make requests of WMI. 
-    // Make requests here:
-
-    // For example, query for all the running processes
     IEnumWbemClassObject* pEnumerator = NULL;
     hres = pSvc->ExecQuery(
         qryLang, 
@@ -169,51 +115,54 @@ void clsWMI::Query() {
         NULL,
         &pEnumerator);
     
-    if (FAILED(hres))
-    {
+    if (FAILED(hres)) {
         printf("Query for processes failed. Error code = %X\n", hres);
         pSvc->Release();
         pLoc->Release();     
         CoUninitialize();
         exit(6);               // Program has failed.
-    }
-    else
-    { 
-        IWbemClassObject *pclsObj;
+    } else {
+		IWbemClassObject *pclsObj;
         ULONG uReturn = 0;
    
-        while (pEnumerator)
-        {
-            hres = pEnumerator->Next(WBEM_INFINITE, 1, 
-                &pclsObj, &uReturn);
+        while (pEnumerator) {
+            hres = pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn);
 
-            if(0 == uReturn) {
-                break;
-            }
+            if(0 == uReturn) break; // Exit loop if no results returned from query
 
             VARIANT vtProp;
 			char *szText;
+			std::wstring prop;
+			std::wstring val;
+			map_str qryResult;
+            // Get the values of the properties
+			int size_of_arrProp = sizeof(arrProp)-1;
 
-            // Get the value of the Name property
-            hres = pclsObj->Get(L"Name", 0, &vtProp, 0, 0);
-			szText = _com_util::ConvertBSTRToString(vtProp.bstrVal); //convert to char* for display
-            printf("Device Name: %s\n",szText);
-			VariantClear(&vtProp);
+			for(int i=0; i<size_of_arrProp; i++) {
+				prop = ctow(arrProp[i].c_str());
+				hres = pclsObj->Get(prop.c_str(), 0, &vtProp, 0, 0);
+				szText = _com_util::ConvertBSTRToString(vtProp.bstrVal); //convert to char*
 
-			hres = pclsObj->Get(L"GUID", 0, &vtProp, 0, 0);
-			szText = _com_util::ConvertBSTRToString(vtProp.bstrVal);
-			printf("Device GUID: %s\n",szText);
-            VariantClear(&vtProp);
+				if (_debug_) val = ctow(szText);
+				if (_debug_) wprintf(L"%s: %s\n",prop.c_str(),val.c_str());
+
+				qryResult[arrProp[i]] = szText;
+				VariantClear(&vtProp);
+			}
+			ResultVec.push_back(qryResult);
         }
-         
-    }
- 
-    // Cleanup
-    // ========
+	}
+}
 
-    pSvc->Release();
-    pLoc->Release();     
-    CoUninitialize();
+std::list<std::string> clsWMI::getNICGUID() {
+	map_str::iterator mpit;
+	std::list<std::string> GUIDList;
+	for(std::vector<map_str>::iterator it = ResultVec.begin(); it != ResultVec.end(); ++it) {
+		map_str tmp = *it;
+		mpit = tmp.find("GUID");
+		GUIDList.push_back(mpit->second);
+	}
+	return GUIDList;
 }
 
 int clsWMI::DeleteClass() {
@@ -331,8 +280,7 @@ int clsWMI::pCreateInstance() {
 									&pResult);
     SysFreeString(PathToClass);
 
-    if (hRes != 0)
-       return 1;
+    if (hRes != 0) return 1;
 
     // Create a new instance.
     pClass->SpawnInstance(0, &pNewInstance);
@@ -343,13 +291,13 @@ int clsWMI::pCreateInstance() {
 
     // Set the Index property (the key).
     V_VT(&v) = VT_I4;
-    V_I4(&v) = x;
+    V_I4(&v) = intInstIndex;
 
     BSTR KeyProp = SysAllocString(L"Index");
     pNewInstance->Put(KeyProp, 0, &v, 0);
     SysFreeString(KeyProp);
     VariantClear(&v);
-	x++; // Increment Index
+	intInstIndex++; // Increment Index
 
 	BSTR strProp;
 	
@@ -394,3 +342,4 @@ int clsWMI::pCreateInstance() {
 
 	return 0;
 }
+
