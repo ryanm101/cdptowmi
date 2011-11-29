@@ -6,8 +6,8 @@
   SMS_Class_ID    ("CUSTOM|NINET_ORG_WMICDP|1.0") ]
 class NINET_ORG_WMICDP : SMS_Class_Template
 {
-  [SMS_Report(FALSE), Key] string Index;
-  [SMS_Report(TRUE)] string TimeStamp;
+  [SMS_Report(FALSE), Key] uint32 Index;
+  [SMS_Report(TRUE)] datetime TimeStamp;
   [SMS_Report(TRUE)] string Platform;
   [SMS_Report(TRUE)] string DeviceID;
   [SMS_Report(TRUE)] string PortID;

@@ -94,6 +94,7 @@
     <ClInclude Include="..\src\clsWMI.h" />
     <ClInclude Include="..\src\guicon.h" />
     <ClInclude Include="..\src\main.h" />
+    <ClInclude Include="..\src\utility.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\resources\version.rc" />

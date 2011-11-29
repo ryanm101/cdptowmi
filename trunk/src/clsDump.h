@@ -22,8 +22,10 @@ class clsDump {
 
 	public:
 		std::list<clsCDP*> lstCDP;	//List of all CDP Packets captured & processed.
+		std::list<std::string> WMI_NICGUID;
 		int nic_int;
 		bool _debug_;
+		bool use_guid_list;
 
 	/* Methods */
 	public:
@@ -35,6 +37,7 @@ class clsDump {
 		int getAdaptors();
 		int listener(pcap_if_t *d);
 		int ReadDump();
+		bool compGUID();
 };
 
 #endif

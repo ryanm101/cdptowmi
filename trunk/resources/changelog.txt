@@ -1,6 +1,10 @@
 CDPtoWMI Changelog
 
-
+0.0.0.3:
+- Added IP address and Management IP to debug output
+- Cleaned up code for NIC query, added "NetConnectionID" to the debug output
+- Search for specific NIC or for multiple NICs (using "LIKE" so names must have common string)
+- 
 
 0.0.0.2: 2011-11-01
 - Commandline arguments now work

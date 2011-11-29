@@ -4,13 +4,19 @@
 #define _WIN32_DCOM
 
 #include "clsEthFrame.h"
+#include "utility.h"
 
 #include <pcap.h>
 #include <iostream>
 #include <stdio.h>
 #include <comdef.h>
 #include <Wbemidl.h>
+#include <string>
 #include <string.h>
+#include <map>
+#include <vector>
+
+typedef std::map<std::string,std::string> map_str;
 
 class clsWMI {
 	// Variables
@@ -23,21 +29,26 @@ class clsWMI {
 		IWbemContext* pCtx;
 		IWbemCallResult* pResult;
 		wchar_t *cname; // WMI Class Name
-		int x; // Instance Index counter
+		int intInstIndex; // Instance Index counter
 		std::string *instProperties;
 		std::string dt;
+		std::vector<map_str> ResultVec;
 
 	// Methods
 	public:
 		clsWMI();
 		~clsWMI();
-		void Query();
+		
 		int DeleteClass();
 		int CreateClass();
 		void CreateInstance(clsCDP *cdp);
 		void setClassName(wchar_t *clsname);
+		void getNICs(std::string name);
+		void getNICs();
+		std::list<std::string> getNICGUID();
 
 	private:
+		void Query(std::string strqry, std::string arrProp[]);
 		int pCreateInstance();
 		int ConnectToWMI();
 };
