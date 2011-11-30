@@ -291,7 +291,7 @@ void clsCDP::print() {
 				printf("VTP Management Domain: %s\n", it->To_str().c_str());
 				break;
 			case NATIVEVLAN:
-				//printf("Native VLAN:           %s\n", it->To_str().c_str());
+				printf("Native VLAN:           %d\n", ntohs(*((u_short *) it->Data)));
 				break;
 			case DUPLEX:
 				//printf("Duplex:                %s\n", it->To_str().c_str());
