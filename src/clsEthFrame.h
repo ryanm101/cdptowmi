@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <list>
+#include "utility.h"
 
 class clsCDPData;
 class clsCDPIP;

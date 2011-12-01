@@ -1,10 +1,10 @@
 CDPtoWMI Changelog
 
 0.0.0.3:
-- Added IP address, Management IP and Native VLAN to debug output
+- Added Capabilities, IP address, Management IP and Native VLAN to debug output
 - Cleaned up code for NIC query, added "NetConnectionID" to the debug output
 - Search for specific NIC or for multiple NICs (using "LIKE" so names must have common string)
-- 
+- Added more CDP Types
 
 0.0.0.2: 2011-11-01
 - Commandline arguments now work

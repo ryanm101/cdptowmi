@@ -276,7 +276,16 @@ void clsCDP::print() {
 				printf("Connected to:          %s\n", it->To_str().c_str());
 				break;
 			case CAPABILITIES:
-				//printf("XXXXX:                 %s\n", it->To_str().c_str());
+				printf("Capabilities:\n");	
+				if (IS_L3R(ctoui(it->Data,true)) != 0) printf("- Is a Router\n");
+				if (IS_L2TB(ctoui(it->Data,true)) != 0) printf("- Is a Transparent Bridge\n");
+				if (IS_L2SRB(ctoui(it->Data,true)) != 0) printf("- Is a Source Route Bridge\n");
+				if (IS_L2SW(ctoui(it->Data,true)) != 0) printf("- Is a Switch\n");
+				if (IS_L3HOST(ctoui(it->Data,true)) != 0) printf("- Is a Host\n");
+				if (IS_IGMP(ctoui(it->Data,true)) != 0) printf("- Is IGMP capable\n");
+				if (IS_L1(ctoui(it->Data,true)) != 0) printf("- Is a Repeater\n");
+				if (IS_IPPHONE1(ctoui(it->Data,true)) != 0) printf("- Is an IPhone ?? 0x80\n");
+				if (IS_IPPHONE2(ctoui(it->Data,true)) != 0) printf("- Is an IPhone ?? 0x0400\n");
 				break;
 			case SOFTWAREVERSION:
 				printf("Software Version:      %s\n", it->To_str().c_str());
