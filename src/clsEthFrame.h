@@ -9,8 +9,12 @@
 #include <list>
 #include "utility.h"
 
+class clsCDPPH;
 class clsCDPData;
+class clsIP;
 class clsCDPIP;
+
+
 
 class clsFRAME {
 	protected:
@@ -56,6 +60,7 @@ class clsCDP: public clsFRAME {
 		u_int IPCount;			// 4 bytes - Number of IPs in Packet
 		std::list<clsCDPData> lstCDPData;  // Variable Data gathered by type
 		std::list<clsCDPIP> lstCDPIPs;  // Variable IP Data gathered by type
+		clsCDPPH *cph;
 
 	public:
 		/* Constructors & Destructor */
@@ -86,19 +91,48 @@ class clsCDPData {
 		std::string To_str();
 };
 
-class clsCDPIP {
+class clsIP {
+	public:
+		u_short AddrLen;	// 2 bytes
+		u_char *Addr;		// 4 bytes
+		u_char Protocol;	// 1 byte
+
+	public:
+		clsIP();
+		clsIP(u_short AddressLength, u_char &Address, u_char Proto);
+		~clsIP();
+		std::string getIP();
+};
+
+class clsCDPIP: public clsIP {
 	public:
 		u_short Type;		// 2 bytes (management IP, etc.)
 		u_char ProtoType;	// 1 byte
 		u_char ProtoLen;	// 1 byte
-		u_char Protocol;	// 1 byte
-		u_short AddrLen;	// 2 bytes
-		u_char *Addr;		// 4 bytes
-
+		
 	public:
 		clsCDPIP();
 		~clsCDPIP();
-		std::string getIP();
+};
+
+class clsCDPPH {
+	public:
+		u_int	OUI;			//3Bytes
+		u_short	ProtocolID;		//2Bytes
+		std::string CMIP;		// Cluster Master IP 4Bytes
+		u_int unknown0;			//Unknown (IP?) 4 Bytes
+		u_char version;			//Version? 1Byte
+		u_char sversion;		//Sub-Version? 1Byte
+		u_char status;			//Status 1Byte
+		u_char unknown1;		//Unknown 1Byte
+		u_char CCMAC[7];		//Cluster Commander MAC 6Bytes
+		u_char SMAC[7];			//Switch's MAC 6Bytes
+		u_char unknown2;		//Unknown 1Byte
+		u_short MVLAN;			//Management Vlan 2Bytes
+
+	public:
+		clsCDPPH();
+		~clsCDPPH();
 };
 
 #endif
