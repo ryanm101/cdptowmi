@@ -3,13 +3,20 @@
 
 #include <string>
 
-inline std::wstring ctow(const char* src)
-{
+inline std::wstring ctow(const char* src) {
     return std::wstring(src, src + strlen(src));
 }
 
-inline u_int ctoui(const u_char* src, bool net_host)
-{
+inline u_short ctous(const u_char* src, bool net_host) {
+	if (net_host) {
+		return ntohs(*((u_short *) src));
+	} else {
+		return *((u_short *) src);
+	}
+}
+
+
+inline u_int ctoui(const u_char* src, bool net_host) {
 	u_int *y = 0;
 	u_short a = 0;
 	u_short b = 0;

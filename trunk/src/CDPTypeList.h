@@ -67,6 +67,19 @@
 #define CAP_IPPHONEUKNOWN1	0x80	// Uknown but is in a CDP packet from a cisco 8961
 #define CAP_IPPHONEUKNOWN2	0x0400	// Uknown but is in a CDP packet from a cisco 8961
 
+//Duplex
+#define DUP_FULL			0x01	
+#define DUP_HALF			0x00	//Need to verify this
+
+//VOIP VLAN REPLY
+#define VOIP_DATA			0x01	//Need to understand this
+
+// Protocol Hello
+// - OUI
+#define PH_OUI_CISCO		0x00000c
+
+// - ID
+#define PH_PID_CM			0x0112	//Cluster Management
 
 
 // MACROS

@@ -171,6 +171,30 @@ int clsCDP::processCDPPayload() {
 				lstCDPIPs.push_back(*cdpip);
 			}
 		}
+
+		if (cdpdata->Type == PROTOCOLHELLO) {
+			int phpos = 4;
+			cph = new clsCDPPH();
+			// Skip Bytes 0-3 as they are the Type and Length
+			cph->OUI = (int) (*(tmp+(phpos)) + *(tmp+(phpos+1)) + *(tmp+(phpos+2))); // we need 3Bytes
+			phpos = phpos+3;
+			cph->ProtocolID = ctous(tmp+(phpos),true);
+			phpos += 2;
+			// Cluster Master IP 4Bytes
+			phpos += 4;
+			cph->unknown0 = ctoui(tmp+(phpos),false);
+			phpos += 4;
+			cph->version = *(tmp+(phpos++));
+			cph->sversion = *(tmp+(phpos++));
+			cph->status = *(tmp+(phpos++));
+			cph->unknown1 = *(tmp+(phpos++));
+			//Cluster Commander MAC 6Bytes
+			phpos += 6;
+			//Switch's MAC 6Bytes
+			phpos += 6;
+			cph->unknown2 = *(tmp+(phpos++));
+			cph->MVLAN = ctous(tmp+(phpos),true);
+		}
 		pos += (cdpdata->Length);
 	}
 
@@ -228,6 +252,7 @@ std::string clsCDP::GetProtocol(u_char ID) {
 
 void clsCDP::print() {
 	int numIP = 0;
+	clsIP *IPAddress;
 	printf("\n---- Ethernet Header ----\n");
 	printf("Destination:   %02X:%02X:%02X:%02X:%02X:%02X\n", 
 			Destination[0],	Destination[1],	Destination[2],	Destination[3],
@@ -261,7 +286,7 @@ void clsCDP::print() {
 				numIP = 0; 
 				for (std::list<clsCDPIP>::iterator itip = lstCDPIPs.begin(); itip != lstCDPIPs.end(); itip++) {
 					if (itip->Type == ADDRESSES) {
-						printf("IP Address%d:           %s\n", numIP,itip->getIP().c_str());
+						printf("IP Address%d:           %s\n", numIP,itip->clsIP::getIP().c_str());
 						if (itip->ProtoType == PROTOT_NLPID) {
 							printf("-Protocol Type:        NLPID\n");
 						} else {
@@ -276,16 +301,16 @@ void clsCDP::print() {
 				printf("Connected to:          %s\n", it->To_str().c_str());
 				break;
 			case CAPABILITIES:
-				printf("Capabilities:\n");	
-				if (IS_L3R(ctoui(it->Data,true)) != 0) printf("- Is a Router\n");
-				if (IS_L2TB(ctoui(it->Data,true)) != 0) printf("- Is a Transparent Bridge\n");
-				if (IS_L2SRB(ctoui(it->Data,true)) != 0) printf("- Is a Source Route Bridge\n");
-				if (IS_L2SW(ctoui(it->Data,true)) != 0) printf("- Is a Switch\n");
-				if (IS_L3HOST(ctoui(it->Data,true)) != 0) printf("- Is a Host\n");
-				if (IS_IGMP(ctoui(it->Data,true)) != 0) printf("- Is IGMP capable\n");
-				if (IS_L1(ctoui(it->Data,true)) != 0) printf("- Is a Repeater\n");
-				if (IS_IPPHONE1(ctoui(it->Data,true)) != 0) printf("- Is an IPhone ?? 0x80\n");
-				if (IS_IPPHONE2(ctoui(it->Data,true)) != 0) printf("- Is an IPhone ?? 0x0400\n");
+				printf("Capabilities: 0x%08X\n", ctoui(it->Data,true));	
+				if (IS_L3R(ctoui(it->Data,true))		!= 0) printf("- Is a Router\n");
+				if (IS_L2TB(ctoui(it->Data,true))		!= 0) printf("- Is a Transparent Bridge\n");
+				if (IS_L2SRB(ctoui(it->Data,true))		!= 0) printf("- Is a Source Route Bridge\n");
+				if (IS_L2SW(ctoui(it->Data,true))		!= 0) printf("- Is a Switch\n");
+				if (IS_L3HOST(ctoui(it->Data,true))		!= 0) printf("- Is a Host\n");
+				if (IS_IGMP(ctoui(it->Data,true))		!= 0) printf("- Is IGMP capable\n");
+				if (IS_L1(ctoui(it->Data,true))			!= 0) printf("- Is a Repeater\n");
+				if (IS_IPPHONE1(ctoui(it->Data,true))	!= 0) printf("- Is an IPPhone ?? 0x80\n");
+				if (IS_IPPHONE2(ctoui(it->Data,true))	!= 0) printf("- Is an IPPhone ?? 0x0400\n");
 				break;
 			case SOFTWAREVERSION:
 				printf("Software Version:      %s\n", it->To_str().c_str());
@@ -294,31 +319,53 @@ void clsCDP::print() {
 				printf("Platform:              %s\n", it->To_str().c_str());
 				break;
 			case PROTOCOLHELLO:
-				//printf("XXXX:                  %s\n", it->To_str().c_str());
+				printf("Protocol Hello:                  \n");
+				printf(" - OUI:					0x%06X\n", cph->OUI);
+				if (cph->ProtocolID == PH_PID_CM) {
+					printf(" - Protocol ID:				Cluster Management\n");
+				} else {
+					printf(" - Protocol ID:			0x%04X (Unknown)\n", cph->ProtocolID);
+				}
+				printf(" - Cluster Master IP:			TODO\n"); // 4Bytes
+				printf(" - Unknown (IP?):			0x%08X\n", cph->unknown0);
+				printf(" - Version(?):				0x%02X\n", cph->version);
+				printf(" - Sub-Version(?):			0x%02X\n", cph->sversion);
+				printf(" - Status:				0x%02X\n", cph->status);
+				printf(" - Unknown:					0x%02X\n", cph->unknown1);
+				printf(" - Cluster Commander MAC:		TODO\n"); // 6Bytes
+				printf(" - Switches MAC:			TODO\n"); // 6Bytes
+				printf(" - Unknown:				0x%02X\n", cph->unknown2);
+				printf(" - Management VLAN:			%d\n", cph->MVLAN);
 				break;
 			case VTPMGMTDOMAIN:
 				printf("VTP Management Domain: %s\n", it->To_str().c_str());
 				break;
 			case NATIVEVLAN:
-				printf("Native VLAN:           %d\n", ntohs(*((u_short *) it->Data)));
+				printf("Native VLAN:		%d\n", ntohs(*((u_short *) it->Data)));
 				break;
 			case DUPLEX:
-				//printf("Duplex:                %s\n", it->To_str().c_str());
+				printf("Duplex:                TODO\n"/*, it->To_str().c_str()*/);
 				break;
 			case VOIPVLANREPLY:
-				//printf("VOIP VLAN REPLY:       %s\n", it->To_str().c_str());
+				printf("VOIP VLAN REPLY:\n");
+				if(*it->Data == VOIP_DATA) {
+					printf ("- Data\n");
+				} else {
+					printf("- Unknown\n");
+				}
+				printf("- Voice VLAN:	       %d\n", ctous((it->Data+1),true));
 				break;
 			case TRUSTBITMAP:
-				//printf("Trust Bitmap:          %s\n", it->To_str().c_str());
+				printf("Trust Bitmap:          %02X\n", *(it->Data));
 				break;
 			case UNTRUSTEDPORTCOS:
-				//printf("Untrusted port CoS:    %s\n", it->To_str().c_str());
+				printf("Untrusted port CoS:    %02X\n", *(it->Data));
 				break;
 			case MGMTADDRESSES:
 				numIP = 0; 
 				for (std::list<clsCDPIP>::iterator itip = lstCDPIPs.begin(); itip != lstCDPIPs.end(); itip++) {
 					if (itip->Type == MGMTADDRESSES) {
-						printf("Management Address%d:           %s\n", numIP,itip->getIP().c_str());
+						printf("Management Address%d:           %s\n", numIP,itip->clsIP::getIP().c_str());
 						if (itip->ProtoType == PROTOT_NLPID) {
 							printf("-Protocol Type:        NLPID\n");
 						} else {
@@ -330,7 +377,7 @@ void clsCDP::print() {
 				}
 				break;
 			case POWERAVAILABLE:
-				//printf("Power Available:       %s\n", it->To_str().c_str());
+				printf("Power Available:       TODO\n"/*, it->To_str().c_str()*/);
 				break;
 			default:
 				break;
@@ -359,12 +406,24 @@ std::string clsCDPData::To_str() {
 }
 
 // Constructors & Destructor
-clsCDPIP::clsCDPIP() {}
+clsCDPPH::clsCDPPH() { }
 
-clsCDPIP::~clsCDPIP() {}
+clsCDPPH::~clsCDPPH() { }
+
+// Constructors & Destructor
+
+clsIP::clsIP() { }
+
+clsIP::clsIP(u_short AddressLength, u_char &Address, u_char Proto) { 
+	AddrLen = AddressLength;
+	Addr = &Address;
+	Protocol = Proto;
+}
+
+clsIP::~clsIP() { }
 
 //Methods
-std::string clsCDPIP::getIP() {
+std::string clsIP::getIP() {
 	std::string tmp;
 	if (Protocol == PROTO_IPV4) {
 		u_char t;
@@ -385,3 +444,10 @@ std::string clsCDPIP::getIP() {
 	}
 	return tmp;
 }
+
+// Constructors & Destructor
+clsCDPIP::clsCDPIP() {}
+
+clsCDPIP::~clsCDPIP() {}
+
+//Methods
