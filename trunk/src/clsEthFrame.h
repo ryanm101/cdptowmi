@@ -3,6 +3,7 @@
 
 #include "CDPTypeList.h"
 #include <pcap.h>
+#include "displaymaps.h"
 #include <iostream>
 #include <stdio.h>
 #include <string.h>

@@ -1,12 +1,13 @@
 #ifndef __CDPMAIN_H_
 #define __CDPMAIN_H_
 
-
+#include "displaymaps.h"
 #include "clsDump.h"
 #include "clsEthFrame.h"
 #include "clsWMI.h"
 #include "guicon.h"
 #include "arglist.h"
+
 
 #include <windows.h>
 #include <stdlib.h>

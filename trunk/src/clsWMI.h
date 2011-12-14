@@ -5,7 +5,6 @@
 
 #include "clsEthFrame.h"
 #include "utility.h"
-
 #include <pcap.h>
 #include <iostream>
 #include <stdio.h>
