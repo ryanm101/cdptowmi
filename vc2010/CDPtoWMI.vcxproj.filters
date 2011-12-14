@@ -42,6 +42,9 @@
     <ClInclude Include="..\src\utility.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\displaymaps.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\resources\version.rc">

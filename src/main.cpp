@@ -1,6 +1,7 @@
 #include "main.h"
 
 using namespace std;
+map_us_str cdptype;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd) {
 	#ifdef DEBUG
@@ -26,6 +27,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		if (_debug_) RedirectIOToConsole();
 	#endif
 
+	populateMaps();
+	
 	wchar_t *cname = L"NINET_ORG_WMICDP"; // Set the WMI Class Name
 
 	clsWMI *wmi = new clsWMI();

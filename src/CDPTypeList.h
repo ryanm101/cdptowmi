@@ -27,14 +27,20 @@
 
 #define VOIPVLANREPLY		0x000e
 #define VOIPVLANQUERY		0x000f // Not seen yet in lab
+#define POWER				0x0010 // Not seen yet in lab - Power consumption
 #define MTU					0x0011 // Not seen yet in lab
 #define TRUSTBITMAP			0x0012
 #define UNTRUSTEDPORTCOS	0x0013
 #define SYSTEMNAME			0x0014 // Not seen yet in lab
-#define SYSTEMOID			0x0015 // Not seen yet in lab
+#define SYSTEMID			0x0015 // Not seen yet in lab
 #define MGMTADDRESSES		0x0016
 #define LOCATION			0x0017 // Not seen yet in lab
+#define EXTPORTID			0x0018 // Not seen yet in lab - External Port-ID
+#define POWERREQUESTED		0x0019 // Not seen yet in lab - Power Requested
 #define POWERAVAILABLE		0x001a
+#define PORTUNIDIR			0x001b // Not seen yet in lab - Port Unidirectional
+#define NRGYZ				0x001d // Not seen yet in lab - EnergyWise over CDP
+#define SPAREPOE			0x001f // Not seen yet in lab - Spare Pair PoE
 
 // Protocol Type List
 #define PROTOT_NLPID		0x01
