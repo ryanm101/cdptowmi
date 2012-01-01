@@ -151,7 +151,7 @@ int clsDump::listener(pcap_if_t *d) {
 
 	if (_debug_) printf("Waiting for 59 seconds...\n");
 
-    // Set a timer to wait for 10 seconds.
+    // Set a timer to wait
     if (!SetWaitableTimer(hTimer, &liDueTime, 0, NULL, NULL, 0))
     {
         if (_debug_) printf("SetWaitableTimer failed (%d)\n", GetLastError());
@@ -207,4 +207,37 @@ int clsDump::listener(pcap_if_t *d) {
 	}
 
 	return 0;
+}
+
+void clsDump::ReadDump(std::string fname) {
+ 
+    char errbuff[PCAP_ERRBUF_SIZE];
+    pcap_t * adhandle = pcap_open_offline(fname.c_str(), errbuff);
+    int res;
+	struct tm ltime;
+	char timestr[16];
+	struct pcap_pkthdr *header;
+	const u_char *pkt_data;
+	time_t local_tv_sec;
+ 
+    while (res = pcap_next_ex(adhandle, &header, &pkt_data) >= 0) { 
+        /* convert the timestamp to CIM_DATETIME format */
+        local_tv_sec = header->ts.tv_sec;
+        localtime_s(&ltime, &local_tv_sec);
+        strftime( timestr, sizeof timestr, "%Y%m%d%H%M%S", &ltime);
+
+		std::string dtstr;
+		std::stringstream tmpstream;
+		tmpstream << header->ts.tv_usec;
+		dtstr = (timestr);
+		dtstr.append(".");
+		dtstr.append(tmpstream.str());
+		dtstr.append("+000");
+
+		clsCDP *cdp;
+		cdp = new clsCDP(&pkt_data, header->caplen, dtstr);
+		cdp->process();
+		if (_debug_) cdp->print();
+		lstCDP.push_back(cdp); 
+    }
 }

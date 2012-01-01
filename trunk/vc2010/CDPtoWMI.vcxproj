@@ -43,6 +43,7 @@
     <LibraryPath>$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)..\builds\$(Configuration)\</OutDir>
     <IntDir>..\builds\intermediate\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)-debug</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)..\builds\$(Configuration)\</OutDir>

@@ -24,7 +24,8 @@
 #define VTPMGMTDOMAIN		0x0009
 #define NATIVEVLAN			0x000a
 #define DUPLEX				0x000b
-
+/*                          0x000c */
+/*                          0x000d */
 #define VOIPVLANREPLY		0x000e
 #define VOIPVLANQUERY		0x000f // Not seen yet in lab
 #define POWER				0x0010 // Not seen yet in lab - Power consumption
@@ -80,13 +81,19 @@
 //VOIP VLAN REPLY
 #define VOIP_DATA			0x01	//Need to understand this
 
-// Protocol Hello
+//Protocol Hello
 // - OUI
 #define PH_OUI_CISCO		0x00000c
 
 // - ID
 #define PH_PID_CM			0x0112	//Cluster Management
 
+
+//NRGYZ
+#define TYPE_NRGYZ_ROLE            0x00000007
+#define TYPE_NRGYZ_DOMAIN          0x00000008
+#define TYPE_NRGYZ_NAME            0x00000009
+#define TYPE_NRGYZ_REPLYTO         0x00000017
 
 // MACROS
 
