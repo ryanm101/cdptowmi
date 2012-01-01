@@ -32,12 +32,11 @@ class clsDump {
 		clsDump();
 		~clsDump();
 		void listen();
+		void ReadDump(std::string fname);
 
 	private:
 		int getAdaptors();
 		int listener(pcap_if_t *d);
-		int ReadDump();
-		bool compGUID();
 };
 
 #endif

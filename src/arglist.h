@@ -7,6 +7,7 @@
 // General
 #define HELP		'h' // Display Help
 #define DEBUG1		'd' // run in debug mode (spew lots to console)
+#define OFFLINE		'f' // Read packet data from file
 #define NIC_INT		'i' // NIC Interface to listen on.
 #define DRYRUN		'w' // Gathers the info but does not touch WMI, should be used with -d
 
@@ -44,6 +45,10 @@ void processargs(int cargs, char** vargs, bool _debug_,map<string,string> &arg) 
 				case NIC_INT:
 					i++;
 					arg["Interface"] = vargs[i];
+					break;
+				case OFFLINE:
+					i++;
+					arg["offlinefile"] = vargs[i];
 					break;
 				default:
 					DisplayHelp();

@@ -16,6 +16,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	args["Debug"] = "false";
 	args["DryRun"] = "false";
 	args["Interface"] = "-1";
+	args["offlinefile"] = "";
 	processargs(__argc,__argv,_debug_, args);
 
 	if (strcmp(args["Debug"].c_str(),"true") == 0) _debug_ = true;
@@ -26,7 +27,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		 */
 		if (_debug_) RedirectIOToConsole();
 	#endif
-
+	
 	populateMaps();
 	
 	wchar_t *cname = L"NINET_ORG_WMICDP"; // Set the WMI Class Name
@@ -50,16 +51,25 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	clsDump *Dump = new clsDump();
 	Dump->_debug_ = _debug_;
-	if(!from_string<int>(Dump->nic_int, args["Interface"], std::hex)) {
-		if (_debug_) printf("from_string failed\n");
-		Dump->nic_int = -1;
+	
+#ifdef DEBUG
+	if (args["offlinefile"].length() > 0) {
+		Dump->ReadDump(args["offlinefile"].c_str());
+	} else {
+#endif
+		if(!from_string<int>(Dump->nic_int, args["Interface"], std::hex)) {
+			if (_debug_) printf("from_string failed\n");
+			Dump->nic_int = -1;
+		}
+
+		Dump->WMI_NICGUID = wmi->getNICGUID();
+		if (_debug_) system("Pause");
+
+
+		Dump->listen();
+#ifdef DEBUG
 	}
-
-	Dump->WMI_NICGUID = wmi->getNICGUID();
-	if (_debug_) system("Pause");
-
-	Dump->listen();
-
+#endif
 	if (strcmp(args["DryRun"].c_str(),"true") != 0) {
 		wmi->DeleteClass();
 		wmi->CreateClass();

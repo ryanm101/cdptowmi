@@ -346,7 +346,17 @@ void clsCDP::print() {
 				printf("%s:		%d\n",cdptype[NATIVEVLAN].c_str(), ntohs(*((u_short *) it->Data)));
 				break;
 			case DUPLEX:
-				printf("%s:                TODO\n",cdptype[DUPLEX].c_str()/*, it->To_str().c_str()*/);
+				switch(*it->Data) {
+					case DUP_FULL:
+						printf("%s:                Full\n",cdptype[DUPLEX].c_str());
+						break;
+					case DUP_HALF:
+						printf("%s:                Half\n",cdptype[DUPLEX].c_str());
+						break;
+					default:
+						printf("%s:                Unknown\n",cdptype[DUPLEX].c_str());
+						break;
+				}
 				break;
 			case VOIPVLANREPLY:
 				printf("%s:\n",cdptype[VOIPVLANREPLY].c_str());
@@ -368,7 +378,7 @@ void clsCDP::print() {
 				for (std::list<clsCDPIP>::iterator itip = lstCDPIPs.begin(); itip != lstCDPIPs.end(); itip++) {
 					if (itip->Type == MGMTADDRESSES) {
 						printf("%s%d:		%s\n",cdptype[MGMTADDRESSES].c_str(), numIP,itip->clsIP::getIP().c_str());
-						if (itip->ProtoType == PROTOT_NLPID) {
+						if (itip->ProtoType == PROTOT_NLPID) { // REPLACE WITH SWITCH
 							printf("-Protocol Type:        NLPID\n");
 						} else {
 							printf("-Protocol Type:             Unknown\n");
