@@ -14,8 +14,22 @@ class clsCDPPH;
 class clsCDPData;
 class clsIP;
 class clsCDPIP;
+class clsMAC;
 
+class clsMAC {
+	public:
+		std::string Address;
 
+	public:
+		clsMAC();
+		~clsMAC();
+		void setMAC(std::string newMAC);
+		std::string getMAC();
+		std::string displayMAC(const char delim);
+		void extractMAC(u_char *MACOffset);
+	private:
+
+};
 
 class clsFRAME {
 	protected:
@@ -26,16 +40,16 @@ class clsFRAME {
 		const u_char *pktdata;	// Packet
 
 		/* Ethernet Header */
-		u_char Destination[7]; // 6 Bytes; Destination MAC
-		u_char Source[7]; // 6 Bytes; Source MAC
-		u_short pktlen; // 2 Bytes; Length of packet (excluding ethernet header)
+		clsMAC Destination;		// 6 Bytes; Destination MAC
+		clsMAC Source;			// 6 Bytes; Source MAC
+		u_short pktlen;			// 2 Bytes; Length of packet (excluding ethernet header)
 
 		/* LLC Header */
-		u_char DSAP_IGBit; //DSAP 4bits, IGBit 4bits
-		u_char SSAP_CRBit; //SSAP 4bits, CRBit 4bits
-		u_char ConField;  // Control Field 1byte
-		u_char OrgCode[4]; // Organisation Code 3bytes
-		u_short PID; // PID 2bytes
+		u_char DSAP_IGBit;		// DSAP 4bits, IGBit 4bits
+		u_char SSAP_CRBit;		// SSAP 4bits, CRBit 4bits
+		u_char ConField;		// Control Field 1byte
+		u_char OrgCode[4];		// Organisation Code 3bytes
+		u_short PID;			// PID 2bytes
 
 	public:
 		/* Constructors & Destructor */
@@ -55,12 +69,12 @@ class clsFRAME {
 class clsCDP: public clsFRAME {
 	public:
 		/* CDP Header & payload */
-		u_char version;			// 1 byte   - Version of CDP being used
-		u_char ttl;				// 1 byte   - Time to Live
-		u_short crc;			// 2 bytes  - Checksum
-		u_int IPCount;			// 4 bytes - Number of IPs in Packet
-		std::list<clsCDPData> lstCDPData;  // Variable Data gathered by type
-		std::list<clsCDPIP> lstCDPIPs;  // Variable IP Data gathered by type
+		u_char version;						// 1 byte   - Version of CDP being used
+		u_char ttl;							// 1 byte   - Time to Live
+		u_short crc;						// 2 bytes  - Checksum
+		u_int IPCount;						// 4 bytes - Number of IPs in Packet
+		std::list<clsCDPData> lstCDPData;   // Variable Data gathered by type
+		std::list<clsCDPIP> lstCDPIPs;		// Variable IP Data gathered by type
 		clsCDPPH *cph;
 
 	public:
@@ -116,7 +130,8 @@ class clsCDPIP: public clsIP {
 		~clsCDPIP();
 };
 
-class clsCDPPH {
+/* Protocol Hello */
+class clsCDPPH { 
 	public:
 		u_int	OUI;			//3Bytes
 		u_short	ProtocolID;		//2Bytes
@@ -126,8 +141,8 @@ class clsCDPPH {
 		u_char sversion;		//Sub-Version? 1Byte
 		u_char status;			//Status 1Byte
 		u_char unknown1;		//Unknown 1Byte
-		u_char CCMAC[7];		//Cluster Commander MAC 6Bytes
-		u_char SMAC[7];			//Switch's MAC 6Bytes
+		clsMAC CCMAC;			//Cluster Commander MAC 6Bytes
+		clsMAC SCMAC;			//Switch's MAC 6Bytes
 		u_char unknown2;		//Unknown 1Byte
 		u_short MVLAN;			//Management Vlan 2Bytes
 
