@@ -15,6 +15,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	map<string,string> args;
 	args["Debug"] = "false";
 	args["DryRun"] = "false";
+	args["InterfaceName"] = "";
 	args["Interface"] = "-1";
 	args["offlinefile"] = "";
 	processargs(__argc,__argv,_debug_, args);

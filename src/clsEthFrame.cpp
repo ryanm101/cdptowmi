@@ -29,20 +29,9 @@ int clsFRAME::process() {
 int clsFRAME::processEthHeader() {
 	u_char *tmp = (u_char *) pktdata;
 	u_short *tmp2 = (u_short*) (pktdata+12);
-	int x = 0;
 
-	for (int i = 0; i<6; i++) {
-			Destination[x] = *(tmp+i);
-			x++;
-	}
-	Destination[7] = '\0';
-
-	x = 0;
-	for (int i = 6; i<12; i++) {
-			Source[x] = *(tmp+i);
-			x++;
-	}
-	Source[6] = '\0';
+	Destination.extractMAC(tmp);
+	Source.extractMAC(tmp+6);
 
 	pktlen = ntohs(*tmp2);
 
@@ -71,13 +60,9 @@ int clsFRAME::processLLCHeader() {
 
 void clsFRAME::print() {
 	printf("\n---- Ethernet Header ----\n");
-	printf("Destination:   %02X:%02X:%02X:%02X:%02X:%02X\n", 
-			Destination[0],	Destination[1],	Destination[2],	Destination[3],
-			Destination[4],	Destination[5],	Destination[6]);
-	printf("Source:        %02X:%02X:%02X:%02X:%02X:%02X\n",
-			Source[0], Source[1], Source[2], Source[3],	Source[4], Source[5], 
-			Source[6]);
-	printf("Packet Length: %d\n",				pktlen);
+	printf("Destination:   %s\n", Destination.displayMAC(':').c_str());
+	printf("Source:        %s\n", Source.displayMAC(':').c_str());
+	printf("Packet Length: %d\n", pktlen);
 
 	printf("\n---- LLC Header ----\n");
 	printf("DSAP Address:  0x%02X\n",			LOBYTE(DSAP_IGBit));
@@ -188,9 +173,9 @@ int clsCDP::processCDPPayload() {
 			cph->sversion = *(tmp+(phpos++));
 			cph->status = *(tmp+(phpos++));
 			cph->unknown1 = *(tmp+(phpos++));
-			//Cluster Commander MAC 6Bytes
+            cph->CCMAC.extractMAC((tmp+(phpos))); //Cluster Commander MAC 6Bytes
 			phpos += 6;
-			//Switch's MAC 6Bytes
+			cph->SCMAC.extractMAC((tmp+(phpos))); //Switch's MAC 6Bytes
 			phpos += 6;
 			cph->unknown2 = *(tmp+(phpos++));
 			cph->MVLAN = ctous(tmp+(phpos),true);
@@ -253,13 +238,9 @@ std::string clsCDP::GetProtocol(u_char ID) {
 void clsCDP::print() {
 	int numIP = 0;
 	printf("\n---- Ethernet Header ----\n");
-	printf("Destination:   %02X:%02X:%02X:%02X:%02X:%02X\n", 
-			Destination[0],	Destination[1],	Destination[2],	Destination[3],
-			Destination[4],	Destination[5],	Destination[6]);
-	printf("Source:        %02X:%02X:%02X:%02X:%02X:%02X\n",
-			Source[0], Source[1], Source[2], Source[3],	Source[4], Source[5], 
-			Source[6]);
-	printf("Packet Length: %d\n",				pktlen);
+	printf("Destination:   %s\n", Destination.displayMAC(':').c_str());
+	printf("Source:        %s\n", Source.displayMAC(':').c_str());
+	printf("Packet Length: %d\n", pktlen);
 
 	printf("\n---- LLC Header ----\n");
 	printf("DSAP Address:  0x%02X\n",			LOBYTE(DSAP_IGBit));
@@ -288,10 +269,10 @@ void clsCDP::print() {
 						printf("%s%d:           %s\n",cdptype[ADDRESSES].c_str(), numIP,itip->clsIP::getIP().c_str());
 						switch(itip->ProtoType) {
 							case PROTOT_NLPID:
-								printf("-Protocol Type:        NLPID\n");
+								printf(" -Protocol Type:        NLPID\n");
 								break;
 							default:
-								printf("-Protocol Type:             Unknown\n");
+								printf(" -Protocol Type:             Unknown\n");
 								break;
 						}
 						printf("-Protocol:             %s\n",GetProtocol(itip->Protocol).c_str());
@@ -304,15 +285,15 @@ void clsCDP::print() {
 				break;
 			case CAPABILITIES:
 				printf("%s:		0x%08X\n",cdptype[CAPABILITIES].c_str(), ctoui(it->Data,true));	
-				if (IS_L3R(ctoui(it->Data,true))		!= 0) printf("- Is a Router\n");
-				if (IS_L2TB(ctoui(it->Data,true))		!= 0) printf("- Is a Transparent Bridge\n");
-				if (IS_L2SRB(ctoui(it->Data,true))		!= 0) printf("- Is a Source Route Bridge\n");
-				if (IS_L2SW(ctoui(it->Data,true))		!= 0) printf("- Is a Switch\n");
-				if (IS_L3HOST(ctoui(it->Data,true))		!= 0) printf("- Is a Host\n");
-				if (IS_IGMP(ctoui(it->Data,true))		!= 0) printf("- Is IGMP capable\n");
-				if (IS_L1(ctoui(it->Data,true))			!= 0) printf("- Is a Repeater\n");
-				if (IS_IPPHONE1(ctoui(it->Data,true))	!= 0) printf("- Is an IPPhone ?? 0x80\n");
-				if (IS_IPPHONE2(ctoui(it->Data,true))	!= 0) printf("- Is an IPPhone ?? 0x0400\n");
+				if (IS_L3R(ctoui(it->Data,true))		!= 0) printf(" -Is a Router\n");
+				if (IS_L2TB(ctoui(it->Data,true))		!= 0) printf(" -Is a Transparent Bridge\n");
+				if (IS_L2SRB(ctoui(it->Data,true))		!= 0) printf(" -Is a Source Route Bridge\n");
+				if (IS_L2SW(ctoui(it->Data,true))		!= 0) printf(" -Is a Switch\n");
+				if (IS_L3HOST(ctoui(it->Data,true))		!= 0) printf(" -Is a Host\n");
+				if (IS_IGMP(ctoui(it->Data,true))		!= 0) printf(" -Is IGMP capable\n");
+				if (IS_L1(ctoui(it->Data,true))			!= 0) printf(" -Is a Repeater\n");
+				if (IS_IPPHONE1(ctoui(it->Data,true))	!= 0) printf(" -Is an IPPhone ?? 0x80\n");
+				if (IS_IPPHONE2(ctoui(it->Data,true))	!= 0) printf(" -Is an IPPhone ?? 0x0400\n");
 				break;
 			case SOFTWAREVERSION:
 				printf("%s:      %s\n",cdptype[SOFTWAREVERSION].c_str(), it->To_str().c_str());
@@ -322,22 +303,22 @@ void clsCDP::print() {
 				break;
 			case PROTOCOLHELLO:
 				printf("%s:                  \n",cdptype[PROTOCOLHELLO].c_str());
-				printf(" -OUI:					0x%06X\n", cph->OUI);
+				printf(" -OUI:				0x%06X\n", cph->OUI);
 				if (cph->ProtocolID == PH_PID_CM) {
-					printf(" -Protocol ID:				Cluster Management\n");
+					printf(" -Protocol ID:			Cluster Management\n");
 				} else {
-					printf(" -Protocol ID:			0x%04X (Unknown)\n", cph->ProtocolID);
+					printf(" -Protocol ID:		0x%04X (Unknown)\n", cph->ProtocolID);
 				}
-				printf(" -Cluster Master IP:			TODO\n"); // 4Bytes
-				printf(" -Unknown (IP?):			0x%08X\n", cph->unknown0);
-				printf(" -Version(?):				0x%02X\n", cph->version);
-				printf(" -Sub-Version(?):			0x%02X\n", cph->sversion);
-				printf(" -Status:				0x%02X\n", cph->status);
-				printf(" -Unknown:					0x%02X\n", cph->unknown1);
-				printf(" -Cluster Commander MAC:		TODO\n"); // 6Bytes
-				printf(" -Switches MAC:			TODO\n"); // 6Bytes
-				printf(" -Unknown:				0x%02X\n", cph->unknown2);
-				printf(" -Management VLAN:			%d\n", cph->MVLAN);
+				printf(" -Cluster Master IP:		TODO\n"); // 4Bytes
+				printf(" -Unknown (IP?):		0x%08X\n", cph->unknown0);
+				printf(" -Version(?):			0x%02X\n", cph->version);
+				printf(" -Sub-Version(?):		0x%02X\n", cph->sversion);
+				printf(" -Status:			0x%02X\n", cph->status);
+				printf(" -Unknown:			0x%02X\n", cph->unknown1);
+				printf(" -Cluster Commander MAC:	%s\n", cph->CCMAC.displayMAC(':').c_str()); // 6Bytes
+				printf(" -Switches MAC:			%s\n", cph->SCMAC.displayMAC(':').c_str()); // 6Bytes
+				printf(" -Unknown:			0x%02X\n", cph->unknown2);
+				printf(" -Management VLAN:		%d\n", cph->MVLAN);
 				break;
 			case VTPMGMTDOMAIN:
 				printf("%s: %s\n",cdptype[VTPMGMTDOMAIN].c_str(), it->To_str().c_str());
@@ -397,7 +378,6 @@ void clsCDP::print() {
 	}
 }
 
-
 std::string clsCDP::getTS() {
 	return cimdt.c_str();
 }
@@ -455,6 +435,53 @@ std::string clsIP::getIP() {
 		tmp = "Unknown - Not IPv4";
 	}
 	return tmp;
+}
+
+// Constructors & Destructor
+clsMAC::clsMAC() {}
+
+clsMAC::~clsMAC() {}
+
+//Methods
+void clsMAC::setMAC(std::string newMAC) {
+	Address = newMAC;
+}
+
+std::string clsMAC::getMAC() {
+	return Address;
+}
+
+std::string clsMAC::displayMAC(const char delim) {
+	std::string tmp;
+	switch(delim) {
+		case ':':
+		case '-':
+			for (int i = 0; i < 12; i++) {
+				tmp += Address[i];
+				if ((i % 2 !=0 ) && (i != 11)) {
+					tmp += delim;
+				}
+			}
+			break;
+		case '.':
+			for (int i = 0; i <6; i++) {
+				tmp += Address[i];
+				if (i == 5) {
+					tmp += delim;
+				}
+			} 
+			break;
+	}
+	return tmp;
+}
+
+void clsMAC::extractMAC(u_char *MACOffset) {
+	u_char MAC[7];
+    for (int i=0; i<6; i++) {
+        MAC[i] = *(MACOffset+i);
+    }
+	MAC[6] = '\0';
+	clsMAC::Address = uctostr(MAC, 6);
 }
 
 // Constructors & Destructor

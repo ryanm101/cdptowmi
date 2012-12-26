@@ -7,6 +7,7 @@ CDPtoWMI Changelog
 - Added more CDP Types
 - Started to refactor code to handle other languages.
 - Added ability to read .pcap files to DEBUG builds using -f "<File>"
+- Changed MAC addresses to use Class clsMAC instead of being u_char* displayed via printf in hex
 
 0.0.0.2: 2011-11-01
 - Commandline arguments now work

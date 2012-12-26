@@ -34,4 +34,15 @@ inline u_int ctoui(const u_char* src, bool net_host) {
     return z;
 }
 
+inline std::string uctostr(u_char *uc, int uclen) {
+	std::string str;
+	char *tmp;
+	tmp = new char [uclen*2+1];
+	for (int i=0;i<uclen;i++) {
+		sprintf_s(&tmp[i*2], uclen*2+1, "%02X", *(uc+i));
+	}
+	str.assign(tmp, uclen*2+1);
+	return str;
+}
+
 #endif
