@@ -20,7 +20,7 @@
 
 
 #define APPNAME			"CDPtoWMI"
-#define ABOUT			"CDPtoWMI captures CDP packets from the network and inserts the information contained in them into WMI,\n allowing administrators to capture that information with a Systems Management system (e.g. SCCM)."
+#define ABOUT			"CDPtoWMI captures CDP packets from the network and inserts the information\ncontained in them into WMI, allowing administrators to capture that\ninformation with a Systems Management system (e.g. SCCM)."
 #define COPYRIGHT1		"Copyright (C) 2011"
 #define COPYRIGHT2		"(c) 2011 by Ryan Mclean 2011\n (ryan1 _ 00 !AT! hotmail !DOT! com). All rights reserved."
 #endif
