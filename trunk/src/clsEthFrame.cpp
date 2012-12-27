@@ -260,31 +260,32 @@ void clsCDP::print() {
 	for (std::list<clsCDPData>::iterator it = lstCDPData.begin(); it != lstCDPData.end(); it++) {
 		switch(it->Type) {
 			case DEVICEID:
-				printf("%s:             %s\n",cdptype[DEVICEID].c_str(), it->To_str().c_str());
+				printf("%s:             \t\t%s\n",cdptype[DEVICEID].c_str(), it->To_str().c_str());
 				break;
 			case ADDRESSES:
+				printf("Addressses:\n");
 				numIP = 0; 
 				for (std::list<clsCDPIP>::iterator itip = lstCDPIPs.begin(); itip != lstCDPIPs.end(); itip++) {
 					if (itip->Type == ADDRESSES) {
-						printf("%s%d:           %s\n",cdptype[ADDRESSES].c_str(), numIP,itip->clsIP::getIP().c_str());
+						printf(" -%s%d:           \t%s\n",cdptype[ADDRESSES].c_str(), numIP,itip->clsIP::getIP().c_str());
 						switch(itip->ProtoType) {
 							case PROTOT_NLPID:
-								printf(" -Protocol Type:        NLPID\n");
+								printf(" --Protocol Type:        \tNLPID\n");
 								break;
 							default:
-								printf(" -Protocol Type:             Unknown\n");
+								printf(" --Protocol Type:             \tUnknown\n");
 								break;
 						}
-						printf("-Protocol:             %s\n",GetProtocol(itip->Protocol).c_str());
+						printf(" --Protocol:             \t%s\n",GetProtocol(itip->Protocol).c_str());
 						numIP++;
 					}
 				}
 				break;
 			case PORTID:
-				printf("%s:          %s\n",cdptype[PORTID].c_str(), it->To_str().c_str());
+				printf("%s:          \t%s\n",cdptype[PORTID].c_str(), it->To_str().c_str());
 				break;
 			case CAPABILITIES:
-				printf("%s:		0x%08X\n",cdptype[CAPABILITIES].c_str(), ctoui(it->Data,true));	
+				printf("%s:		\t0x%08X\n",cdptype[CAPABILITIES].c_str(), ctoui(it->Data,true));	
 				if (IS_L3R(ctoui(it->Data,true))		!= 0) printf(" -Is a Router\n");
 				if (IS_L2TB(ctoui(it->Data,true))		!= 0) printf(" -Is a Transparent Bridge\n");
 				if (IS_L2SRB(ctoui(it->Data,true))		!= 0) printf(" -Is a Source Route Bridge\n");
@@ -296,10 +297,10 @@ void clsCDP::print() {
 				if (IS_IPPHONE2(ctoui(it->Data,true))	!= 0) printf(" -Is an IPPhone ?? 0x0400\n");
 				break;
 			case SOFTWAREVERSION:
-				printf("%s:      %s\n",cdptype[SOFTWAREVERSION].c_str(), it->To_str().c_str());
+				printf("%s:      \t\t%s\n",cdptype[SOFTWAREVERSION].c_str(), it->To_str().c_str());
 				break;
 			case PLATFORM:
-				printf("%s:              %s\n",cdptype[PLATFORM].c_str(), it->To_str().c_str());
+				printf("%s:              \t\t%s\n",cdptype[PLATFORM].c_str(), it->To_str().c_str());
 				break;
 			case PROTOCOLHELLO:
 				printf("%s:                  \n",cdptype[PROTOCOLHELLO].c_str());
@@ -321,56 +322,63 @@ void clsCDP::print() {
 				printf(" -Management VLAN:		%d\n", cph->MVLAN);
 				break;
 			case VTPMGMTDOMAIN:
-				printf("%s: %s\n",cdptype[VTPMGMTDOMAIN].c_str(), it->To_str().c_str());
+				printf("%s:	\t%s\n",cdptype[VTPMGMTDOMAIN].c_str(), it->To_str().c_str());
 				break;
 			case NATIVEVLAN:
-				printf("%s:		%d\n",cdptype[NATIVEVLAN].c_str(), ntohs(*((u_short *) it->Data)));
+				printf("%s:	\t\t%d\n",cdptype[NATIVEVLAN].c_str(), ntohs(*((u_short *) it->Data)));
 				break;
 			case DUPLEX:
 				switch(*it->Data) {
 					case DUP_FULL:
-						printf("%s:                Full\n",cdptype[DUPLEX].c_str());
+						printf("%s:                \t\tFull\n",cdptype[DUPLEX].c_str());
 						break;
 					case DUP_HALF:
-						printf("%s:                Half\n",cdptype[DUPLEX].c_str());
+						printf("%s:                \t\tHalf\n",cdptype[DUPLEX].c_str());
 						break;
 					default:
-						printf("%s:                Unknown\n",cdptype[DUPLEX].c_str());
+						printf("%s:                \t\tUnknown\n",cdptype[DUPLEX].c_str());
 						break;
 				}
 				break;
 			case VOIPVLANREPLY:
 				printf("%s:\n",cdptype[VOIPVLANREPLY].c_str());
-				if(*it->Data == VOIP_DATA) { // REPLACE WITH SWITCH
-					printf ("-Data\n");
-				} else {
-					printf("-Unknown\n");
+				switch(*it->Data) {
+					case VOIP_DATA:
+						printf ("-Data\n");
+						break;
+					default:
+						printf("-Unknown\n");
+						break;
 				}
 				printf("- Voice VLAN:	       %d\n", ctous((it->Data+1),true));
 				break;
 			case TRUSTBITMAP:
-				printf("%s:          %02X\n",cdptype[TRUSTBITMAP].c_str(), *(it->Data));
+				printf("%s:          \t\t%02X\n",cdptype[TRUSTBITMAP].c_str(), *(it->Data));
 				break;
 			case UNTRUSTEDPORTCOS:
-				printf("%s:    %02X\n",cdptype[UNTRUSTEDPORTCOS].c_str(), *(it->Data));
+				printf("%s:    \t\t%02X\n",cdptype[UNTRUSTEDPORTCOS].c_str(), *(it->Data));
 				break;
 			case MGMTADDRESSES:
+				printf("Management Addressses:\n");
 				numIP = 0; 
 				for (std::list<clsCDPIP>::iterator itip = lstCDPIPs.begin(); itip != lstCDPIPs.end(); itip++) {
 					if (itip->Type == MGMTADDRESSES) {
-						printf("%s%d:		%s\n",cdptype[MGMTADDRESSES].c_str(), numIP,itip->clsIP::getIP().c_str());
-						if (itip->ProtoType == PROTOT_NLPID) { // REPLACE WITH SWITCH
-							printf("-Protocol Type:        NLPID\n");
-						} else {
-							printf("-Protocol Type:             Unknown\n");
+						printf(" -%s%d:		%s\n",cdptype[MGMTADDRESSES].c_str(), numIP,itip->clsIP::getIP().c_str());
+						switch(itip->ProtoType) {
+							case PROTOT_NLPID:
+								printf(" --Protocol Type:        \tNLPID\n");
+								break;
+							default:
+								printf(" --Protocol Type:             \tUnknown\n");
+								break;
 						}
-						printf("-Protocol:             %s\n",GetProtocol(itip->Protocol).c_str());
+						printf(" --Protocol:             \t%s\n",GetProtocol(itip->Protocol).c_str());
 						numIP++;
 					}
 				}
 				break;
 			case POWERAVAILABLE:
-				printf("%s:       TODO\n",cdptype[POWERAVAILABLE].c_str()/*, it->To_str().c_str()*/);
+				printf("%s:       \t\tTODO\n",cdptype[POWERAVAILABLE].c_str()/*, it->To_str().c_str()*/);
 				break;
 			default:
 				break;
@@ -486,6 +494,8 @@ void clsMAC::extractMAC(u_char *MACOffset) {
 
 // Constructors & Destructor
 clsCDPIP::clsCDPIP() {}
+
+clsCDPIP::clsCDPIP(u_short AddressLength, u_char &Address, u_char Proto) {}
 
 clsCDPIP::~clsCDPIP() {}
 
