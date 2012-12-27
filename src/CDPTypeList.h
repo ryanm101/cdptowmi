@@ -108,4 +108,8 @@
 #define IS_IPPHONE1(x)		(x & CAP_IPPHONEUKNOWN1)
 #define IS_IPPHONE2(x)		(x & CAP_IPPHONEUKNOWN2)
 
+// LLC - DSAP / SSAP
+#define IS_DSAP_I(x)		(x & 1)  // If 0 then Individual else Group
+#define IS_SSAP_C(x)		(x & 1)  // If 0 then Command else Response
+
 #endif

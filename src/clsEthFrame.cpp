@@ -43,8 +43,8 @@ int clsFRAME::processLLCHeader() {
 	u_short *tmp2 = (u_short*) (pktdata+20);
 	int x = 0;
 
-	DSAP_IGBit = *(tmp);
-	SSAP_CRBit = *(tmp+1);
+	DSAP = *(tmp);
+	SSAP = *(tmp+1);
 	ConField   = *(tmp+2);
 
 	for (int i = 3; i<6; i++) {
@@ -65,10 +65,18 @@ void clsFRAME::print() {
 	printf("Packet Length: %d\n", pktlen);
 
 	printf("\n---- LLC Header ----\n");
-	printf("DSAP Address:  0x%02X\n",			LOBYTE(DSAP_IGBit));
-	printf("DSAP IG Bit:   0x%02X\n",			HIBYTE(DSAP_IGBit));
-	printf("SSAP Address:  0x%02X\n",			LOBYTE(SSAP_CRBit));
-	printf("SSAP CR Bit:   0x%02X\n",			HIBYTE(SSAP_CRBit));
+	printf("DSAP Address:  0x%02X\n", DSAP);
+	if (IS_DSAP_I(DSAP) == 0) {
+		printf("DSAP IG Bit:   Individual (0x00)\n");
+	} else {
+		printf("DSAP IG Bit:   Group (0x01)\n");
+	}
+	printf("SSAP Address:  0x%02X\n", SSAP);
+	if (IS_SSAP_C(SSAP) == 0) {
+		printf("SSAP CR Bit:   Command (0x00)\n");
+	} else {
+		printf("SSAP CR Bit:   Response (0x01)\n");
+	}
 	printf("ConField:      0x%02X\n",			ConField);
 	printf("OrgCode:       0x%02X%02X%02X\n",	OrgCode[0], OrgCode[1],OrgCode[2]);
 	printf("PID:           0x%02X\n",			PID);
@@ -253,10 +261,18 @@ void clsCDP::print() {
 	printf("Packet Length: %d\n", pktlen);
 
 	printf("\n---- LLC Header ----\n");
-	printf("DSAP Address:  0x%02X\n",			LOBYTE(DSAP_IGBit));
-	printf("DSAP IG Bit:   0x%02X\n",			HIBYTE(DSAP_IGBit));
-	printf("SSAP Address:  0x%02X\n",			LOBYTE(SSAP_CRBit));
-	printf("SSAP CR Bit:   0x%02X\n",			HIBYTE(SSAP_CRBit));
+	printf("DSAP Address:  0x%02X\n", DSAP);
+	if (IS_DSAP_I(DSAP) == 0) {
+		printf("DSAP IG Bit:   Individual (0x00)\n");
+	} else {
+		printf("DSAP IG Bit:   Group (0x01)\n");
+	}
+	printf("SSAP Address:  0x%02X\n", SSAP);
+	if (IS_SSAP_C(SSAP) == 0) {
+		printf("SSAP CR Bit:   Command (0x00)\n");
+	} else {
+		printf("SSAP CR Bit:   Response (0x01)\n");
+	}
 	printf("ConField:      0x%02X\n",			ConField);
 	printf("OrgCode:       0x%02X%02X%02X\n",	OrgCode[0], OrgCode[1],OrgCode[2]);
 	printf("PID:           0x%02X\n",			PID);
