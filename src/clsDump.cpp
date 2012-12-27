@@ -46,16 +46,23 @@ void clsDump::listen() {
 					}
 				}
 			#else
-				if (nic_int != -1) {
-					while (i < nic_int) { // loop until we get to the nic we care about.
-						d= d->next;
-						i++;
-					} 
-					listener(d);
-					break;
-				} else {
-					listener(d);
-				}
+				if (WMI_NICGUID.empty()) {
+						listener(d); // Listen on all for now
+					} else {
+						std::string tmp;
+						while (d != NULL) { // loop until we get to the nic(s) we care about.
+							for(std::list<std::string>::iterator it = WMI_NICGUID.begin(); it != WMI_NICGUID.end(); ++it) {
+								tmp = "rpcap://\\Device\\NPF_";
+								tmp.append((*it));
+								if (tmp.compare(d->name) == 0) {
+									listener(d);
+									break;
+								} 
+							}
+							d= d->next;
+						} 
+						break;
+					}
 			#endif
 		}
 		if (i == 0) {
