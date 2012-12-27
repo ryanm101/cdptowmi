@@ -10,11 +10,12 @@
 #include <list>
 #include "utility.h"
 
+class clsMAC;
 class clsCDPPH;
+class clsPowerAvail;
 class clsCDPData;
 class clsIP;
 class clsCDPIP;
-class clsMAC;
 
 class clsMAC {
 	public:
@@ -75,7 +76,8 @@ class clsCDP: public clsFRAME {
 		u_int IPCount;						// 4 bytes - Number of IPs in Packet
 		std::list<clsCDPData> lstCDPData;   // Variable Data gathered by type
 		std::list<clsCDPIP> lstCDPIPs;		// Variable IP Data gathered by type
-		clsCDPPH *cph;
+		clsCDPPH *cph;						// Protocol Hello
+		clsPowerAvail *pa;					// PowerAvailable
 
 	public:
 		/* Constructors & Destructor */
@@ -150,6 +152,18 @@ class clsCDPPH {
 	public:
 		clsCDPPH();
 		~clsCDPPH();
+};
+
+class clsPowerAvail {
+	public:
+		u_short RequestID;		//2Bytes
+		u_short ManagementID;	//2Bytes
+		u_long PowerAvail;		//4Bytes
+		u_long TotPowerAvail;	//4Bytes
+
+	public:
+		clsPowerAvail();
+		~clsPowerAvail();
 };
 
 #endif

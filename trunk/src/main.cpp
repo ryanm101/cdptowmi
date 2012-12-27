@@ -42,8 +42,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	nicname = "Local Area Connection";
 	//nicname = "Lgas";
 
-	if (nicname != "") {
-		wmi->getNICs(nicname);
+	if (args["InterfaceName"].length() > 0) {
+		wmi->getNICs(args["InterfaceName"]);
 	} else {
 		wmi->getNICs();
 	}

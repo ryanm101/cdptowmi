@@ -180,6 +180,16 @@ int clsCDP::processCDPPayload() {
 			cph->unknown2 = *(tmp+(phpos++));
 			cph->MVLAN = ctous(tmp+(phpos),true);
 		}
+
+		if (cdpdata->Type == POWERAVAILABLE) {
+			int papos = 2;
+			pa = new clsPowerAvail();
+			pa->RequestID = ntohs(*(tmp2+(papos++)));
+			pa->ManagementID = ntohs(*(tmp2+(papos++)));
+			memcpy(&pa->PowerAvail, tmp2+(papos), 4);
+			papos += 2;
+			memcpy(&pa->TotPowerAvail, tmp2+(papos), 4);
+		}
 		pos += (cdpdata->Length);
 	}
 
@@ -344,13 +354,13 @@ void clsCDP::print() {
 				printf("%s:\n",cdptype[VOIPVLANREPLY].c_str());
 				switch(*it->Data) {
 					case VOIP_DATA:
-						printf ("-Data\n");
+						printf (" -Data\n");
 						break;
 					default:
-						printf("-Unknown\n");
+						printf(" -Unknown\n");
 						break;
 				}
-				printf("- Voice VLAN:	       %d\n", ctous((it->Data+1),true));
+				printf("--Voice VLAN:	       \t%d\n", ctous((it->Data+1),true));
 				break;
 			case TRUSTBITMAP:
 				printf("%s:          \t\t%02X\n",cdptype[TRUSTBITMAP].c_str(), *(it->Data));
@@ -378,7 +388,11 @@ void clsCDP::print() {
 				}
 				break;
 			case POWERAVAILABLE:
-				printf("%s:       \t\tTODO\n",cdptype[POWERAVAILABLE].c_str()/*, it->To_str().c_str()*/);
+				printf("%s:\n",cdptype[POWERAVAILABLE].c_str());
+				printf(" -Request-ID: \t\t\t%i\n",pa->RequestID);
+				printf(" -Management-ID: \t\t%i\n",pa->ManagementID);
+				printf(" -Power Available: \t\t%u\n",pa->PowerAvail);
+				printf(" -Total Power Available: \t%u\n",pa->TotPowerAvail);
 				break;
 			default:
 				break;
@@ -498,5 +512,14 @@ clsCDPIP::clsCDPIP() {}
 clsCDPIP::clsCDPIP(u_short AddressLength, u_char &Address, u_char Proto) {}
 
 clsCDPIP::~clsCDPIP() {}
+
+//Methods
+
+
+
+// Constructors & Destructor
+clsPowerAvail::clsPowerAvail() {}
+
+clsPowerAvail::~clsPowerAvail() {}
 
 //Methods
