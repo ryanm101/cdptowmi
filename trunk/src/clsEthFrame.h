@@ -139,7 +139,7 @@ class clsCDPPH {
 	public:
 		u_int	OUI;			//3Bytes
 		u_short	ProtocolID;		//2Bytes
-		std::string CMIP;		// Cluster Master IP 4Bytes
+		u_int CMIP;				// Cluster Master IP 4Bytes
 		u_int unknown0;			//Unknown (IP?) 4 Bytes
 		u_char version;			//Version? 1Byte
 		u_char sversion;		//Sub-Version? 1Byte

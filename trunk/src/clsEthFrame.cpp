@@ -145,48 +145,48 @@ int clsCDP::processCDPPayload() {
 			/* IPv4 Address = 4Bytes
 			 */
 			numIP = 0;
-			clsCDPIP *cdpip = new clsCDPIP();
-
 			numIP = (int) (ntohs(*(tmp2+(2))) + ntohs(*(tmp2+(3)))); // we need 4Bytes but ntohs() only works on 2Bytes at time
-
+			tmp+=8; // Skip to start of IP Address
 			for(int i = 0; i < numIP; i++) {
+				clsCDPIP *cdpip = new clsCDPIP();
 				cdpip->Type = cdpdata->Type;
-				cdpip->ProtoType = *(tmp+(8+i));
-				cdpip->ProtoLen = *(tmp+(9+i));
-				cdpip->Protocol = *(tmp+(10+i));
-				cdpip->AddrLen = (*(tmp+(12+i)) + *(tmp+(11+i))); // As we are dealing with individual bytes just retrieve in correct ordered instead of calling ntohs().
-
+				cdpip->ProtoType = *(tmp++);
+				cdpip->ProtoLen = *(tmp++);
+				cdpip->Protocol = *(tmp++);
+				cdpip->AddrLen = (*(tmp+1)) + *(tmp); // As we are dealing with individual bytes just retrieve in correct ordered instead of calling ntohs().
+				tmp+=2; // Move along two places
 				cdpip->Addr = new u_char[cdpip->AddrLen+1];
 				memset(&cdpip->Addr[0], 0, sizeof(cdpip->Addr+1));
 				for(int x = 0;x < cdpip->AddrLen; x++) {
-					cdpip->Addr[x] = *(tmp+(13+x+i));
+					cdpip->Addr[x] = *(tmp++);
 				}
 				lstCDPIPs.push_back(*cdpip);
 			}
 		}
 
 		if (cdpdata->Type == PROTOCOLHELLO) {
-			int phpos = 4;
 			cph = new clsCDPPH();
 			// Skip Bytes 0-3 as they are the Type and Length
-			cph->OUI = (int) (*(tmp+(phpos)) + *(tmp+(phpos+1)) + *(tmp+(phpos+2))); // we need 3Bytes
-			phpos = phpos+3;
-			cph->ProtocolID = ctous(tmp+(phpos),true);
-			phpos += 2;
+			tmp+=4;
+			cph->OUI = (int) (*(tmp) + *(tmp+1) + *(tmp+2)); // we need 3Bytes
+			tmp+=3;
+			cph->ProtocolID = ctous(tmp,true);
+			tmp+=2;
 			// Cluster Master IP 4Bytes
-			phpos += 4;
-			cph->unknown0 = ctoui(tmp+(phpos),false);
-			phpos += 4;
-			cph->version = *(tmp+(phpos++));
-			cph->sversion = *(tmp+(phpos++));
-			cph->status = *(tmp+(phpos++));
-			cph->unknown1 = *(tmp+(phpos++));
-            cph->CCMAC.extractMAC((tmp+(phpos))); //Cluster Commander MAC 6Bytes
-			phpos += 6;
-			cph->SCMAC.extractMAC((tmp+(phpos))); //Switch's MAC 6Bytes
-			phpos += 6;
-			cph->unknown2 = *(tmp+(phpos++));
-			cph->MVLAN = ctous(tmp+(phpos),true);
+			cph->CMIP = ctoui(tmp,false);
+			tmp+=4;
+			cph->unknown0 = ctoui(tmp,false);
+			tmp+=4;
+			cph->version = *(tmp++);
+			cph->sversion = *(tmp++);
+			cph->status = *(tmp++);
+			cph->unknown1 = *(tmp++);
+            cph->CCMAC.extractMAC((tmp)); //Cluster Commander MAC 6Bytes
+			tmp+=6;
+			cph->SCMAC.extractMAC((tmp)); //Switch's MAC 6Bytes
+			tmp+=6;
+			cph->unknown2 = *(tmp++);
+			cph->MVLAN = ctous(tmp,true);
 		}
 
 		if (cdpdata->Type == POWERAVAILABLE) {
@@ -296,10 +296,10 @@ void clsCDP::print() {
 						printf(" -%s%d:           \t%s\n",cdptype[ADDRESSES].c_str(), numIP,itip->clsIP::getIP().c_str());
 						switch(itip->ProtoType) {
 							case PROTOT_NLPID:
-								printf(" --Protocol Type:        \tNLPID\n");
+								printf(" --Protocol Type:        \tNLPID (0x%02X)\n",itip->ProtoType);
 								break;
 							default:
-								printf(" --Protocol Type:             \tUnknown\n");
+								printf(" --Protocol Type:             \tUnknown (0x%02X)\n",itip->ProtoType);
 								break;
 						}
 						printf(" --Protocol:             \t%s\n",GetProtocol(itip->Protocol).c_str());
@@ -336,7 +336,7 @@ void clsCDP::print() {
 				} else {
 					printf(" -Protocol ID:		0x%04X (Unknown)\n", cph->ProtocolID);
 				}
-				printf(" -Cluster Master IP:		TODO\n"); // 4Bytes
+				printf(" -Cluster Master IP:		0x%08X\n", cph->CMIP);
 				printf(" -Unknown (IP?):		0x%08X\n", cph->unknown0);
 				printf(" -Version(?):			0x%02X\n", cph->version);
 				printf(" -Sub-Version(?):		0x%02X\n", cph->sversion);
