@@ -81,12 +81,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 	} else {
 		if (_debug_) printf("DryRun: Delete WMI Class\n");
-		if (_debug_) printf("DryRun: Create WMI Class - %s\n", cname);
+		if (_debug_) printf("DryRun: Create WMI Class - %ls\n", cname);
 		while(!Dump->lstCDP.empty()) {
-			if (_debug_) printf("DryRun: Add Instance");
+			if (_debug_) printf("DryRun: Add Instance\n");
 			Dump->lstCDP.pop_front();
 		}
-		if (_debug_) printf("DryRun: Done");
+		if (_debug_) printf("DryRun: Done\n");
 		if (_debug_) system("pause");
 	}
 

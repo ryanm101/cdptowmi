@@ -127,6 +127,7 @@ class clsCDPIP: public clsIP {
 		
 	public:
 		clsCDPIP();
+		clsCDPIP(u_short AddressLength, u_char &Address, u_char Proto);
 		~clsCDPIP();
 };
 
