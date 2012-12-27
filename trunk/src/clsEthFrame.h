@@ -46,8 +46,9 @@ class clsFRAME {
 		u_short pktlen;			// 2 Bytes; Length of packet (excluding ethernet header)
 
 		/* LLC Header */
-		u_char DSAP_IGBit;		// DSAP 4bits, IGBit 4bits
-		u_char SSAP_CRBit;		// SSAP 4bits, CRBit 4bits
+		u_char DSAP;			// DSAP 7bits, IGBit 1bit		
+		u_char SSAP;			// SSAP 7bits, CRBit 1bit
+
 		u_char ConField;		// Control Field 1byte
 		u_char OrgCode[4];		// Organisation Code 3bytes
 		u_short PID;			// PID 2bytes
@@ -154,6 +155,7 @@ class clsCDPPH {
 		~clsCDPPH();
 };
 
+/* Power Available */
 class clsPowerAvail {
 	public:
 		u_short RequestID;		//2Bytes
