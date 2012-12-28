@@ -13,6 +13,7 @@
 **************/
 
 // CDP TypeList
+#define UNKNOWN_0x0000      0x0000
 #define DEVICEID			0x0001
 #define ADDRESSES			0x0002
 #define PORTID				0x0003
@@ -24,8 +25,8 @@
 #define VTPMGMTDOMAIN		0x0009
 #define NATIVEVLAN			0x000a
 #define DUPLEX				0x000b
-/*                          0x000c */
-/*                          0x000d */
+#define UNKNOWN_0x000c      0x000c
+#define UNKNOWN_0x000d      0x000d
 #define VOIPVLANREPLY		0x000e
 #define VOIPVLANQUERY		0x000f // Not seen yet in lab
 #define POWER				0x0010 // Not seen yet in lab - Power consumption
@@ -40,7 +41,9 @@
 #define POWERREQUESTED		0x0019 // Not seen yet in lab - Power Requested
 #define POWERAVAILABLE		0x001a
 #define PORTUNIDIR			0x001b // Not seen yet in lab - Port Unidirectional
+#define UNKNOWN_0x001c      0x001c
 #define NRGYZ				0x001d // Not seen yet in lab - EnergyWise over CDP
+#define UNKNOWN_0x001e      0x001e
 #define SPAREPOE			0x001f // Not seen yet in lab - Spare Pair PoE
 
 // Protocol Type List

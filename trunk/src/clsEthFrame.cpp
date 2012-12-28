@@ -28,32 +28,29 @@ int clsFRAME::process() {
 
 int clsFRAME::processEthHeader() {
 	u_char *tmp = (u_char *) pktdata;
-	u_short *tmp2 = (u_short*) (pktdata+12);
 
 	Destination.extractMAC(tmp);
-	Source.extractMAC(tmp+6);
-
-	pktlen = ntohs(*tmp2);
+	tmp+=6;
+	Source.extractMAC(tmp);
+	tmp+=6;
+	pktlen = ntohs(*(reinterpret_cast<u_short *> (tmp)));
 
 	return 0;
 }
 
 int clsFRAME::processLLCHeader() {
 	u_char *tmp = (u_char *) (pktdata+14);
-	u_short *tmp2 = (u_short*) (pktdata+20);
-	int x = 0;
 
-	DSAP = *(tmp);
-	SSAP = *(tmp+1);
-	ConField   = *(tmp+2);
+	DSAP = *(tmp++);
+	SSAP = *(tmp++);
+	ConField = *(tmp++);
 
-	for (int i = 3; i<6; i++) {
-			OrgCode[x] = *(tmp+i);
-			x++;
+	for (int i = 0; i<3; i++) {
+			OrgCode[i] = *(tmp++);
 	}
 	OrgCode[3] = '\0';
 
-	PID = ntohs(*tmp2);
+	PID = ntohs(*(reinterpret_cast<u_short *> (tmp)));
 
 	return 0;
 }
@@ -104,11 +101,10 @@ int clsCDP::process() {
 
 int clsCDP::processCDPHeader() { 
 	u_char *tmp = (u_char *) (pktdata+22);
-	u_short *tmp2 = (u_short*) (pktdata+24);
 
-	version = *tmp;
-	ttl = *(tmp+1);
-	crc = ntohs(*tmp2);
+	version = *tmp++;
+	ttl = *(tmp++);
+	crc = ntohs(*(reinterpret_cast<unsigned short *> (tmp)));
 
 	return 0;
 }
@@ -122,13 +118,13 @@ int clsCDP::processCDPPayload() {
 		u_short *tmp2 = (u_short*) (pktdata+(26+pos));
 		clsCDPData *cdpdata = new clsCDPData();
 
-		cdpdata->Type = ntohs(*tmp2);
-		cdpdata->Length = ntohs(*(tmp2+(1)));
-		cdpdata->Data = new u_char[cdpdata->Length-4];
-
-		for(int i = 0; i < (cdpdata->Length - 3); i++) {
-			cdpdata->Data[i] =  *(tmp+4+i);
-		}
+		cdpdata->Type = ntohs(*(reinterpret_cast<unsigned short *> (tmp)));
+		tmp+=2;
+		cdpdata->Length = ntohs(*(reinterpret_cast<unsigned short *> (tmp)));
+		tmp+=2;
+		cdpdata->Data = new u_char[cdpdata->Length-3];
+		memset(cdpdata->Data,0,cdpdata->Length-3);
+		memcpy(cdpdata->Data,tmp,cdpdata->Length-4);
 
 		lstCDPData.push_back(*cdpdata);	
 
@@ -140,40 +136,36 @@ int clsCDP::processCDPPayload() {
 			/* 9 Bytes per IPv4 IP,
 			/* Protocol Type = 1Byte
 			/* Protocol Len = 1Byte
-			/* Protocol = 1Byte
+			/* Protocol = 1Byte (Variable)
 			/* Address Length = 2Bytes
 			/* IPv4 Address = 4Bytes
 			 */
 			numIP = 0;
+			//numIP = ( ntohs(*(reinterpret_cast<unsigned short *> (tmp))) + ntohs(*(reinterpret_cast<unsigned short *> (tmp+1))) );
 			numIP = (int) (ntohs(*(tmp2+(2))) + ntohs(*(tmp2+(3)))); // we need 4Bytes but ntohs() only works on 2Bytes at time
-			tmp+=8; // Skip to start of IP Address
+			tmp+=4; // Move to start of IP Address
 			for(int i = 0; i < numIP; i++) {
 				clsCDPIP *cdpip = new clsCDPIP();
 				cdpip->Type = cdpdata->Type;
 				cdpip->ProtoType = *(tmp++);
-				cdpip->ProtoLen = *(tmp++);
+				cdpip->ProtoLen = *(tmp++);  // FIXME - will not handle protocol lengths > 1
 				cdpip->Protocol = *(tmp++);
 				cdpip->AddrLen = (*(tmp+1)) + *(tmp); // As we are dealing with individual bytes just retrieve in correct ordered instead of calling ntohs().
 				tmp+=2; // Move along two places
 				cdpip->Addr = new u_char[cdpip->AddrLen+1];
-				memset(&cdpip->Addr[0], 0, sizeof(cdpip->Addr+1));
-				for(int x = 0;x < cdpip->AddrLen; x++) {
-					cdpip->Addr[x] = *(tmp++);
-				}
+				memset(cdpip->Addr, 0, cdpip->AddrLen+1);
+				memcpy(cdpip->Addr,tmp,cdpip->AddrLen);
 				lstCDPIPs.push_back(*cdpip);
 			}
 		}
 
 		if (cdpdata->Type == PROTOCOLHELLO) {
 			cph = new clsCDPPH();
-			// Skip Bytes 0-3 as they are the Type and Length
-			tmp+=4;
 			cph->OUI = (int) (*(tmp) + *(tmp+1) + *(tmp+2)); // we need 3Bytes
 			tmp+=3;
 			cph->ProtocolID = ctous(tmp,true);
 			tmp+=2;
-			// Cluster Master IP 4Bytes
-			cph->CMIP = ctoui(tmp,false);
+			cph->CMIP = ctoui(tmp,false); // Cluster Master IP 4Bytes
 			tmp+=4;
 			cph->unknown0 = ctoui(tmp,false);
 			tmp+=4;
@@ -192,11 +184,13 @@ int clsCDP::processCDPPayload() {
 		if (cdpdata->Type == POWERAVAILABLE) {
 			int papos = 2;
 			pa = new clsPowerAvail();
-			pa->RequestID = ntohs(*(tmp2+(papos++)));
-			pa->ManagementID = ntohs(*(tmp2+(papos++)));
-			memcpy(&pa->PowerAvail, tmp2+(papos), 4);
-			papos += 2;
-			memcpy(&pa->TotPowerAvail, tmp2+(papos), 4);
+			pa->RequestID = ntohs(*(reinterpret_cast<unsigned short *> (tmp)));
+			tmp+=2;
+			pa->ManagementID = ntohs(*(reinterpret_cast<unsigned short *> (tmp)));
+			tmp+=2;
+			memcpy(&pa->PowerAvail, tmp, 4);
+			tmp+=4;
+			memcpy(&pa->TotPowerAvail, tmp, 4);
 		}
 		pos += (cdpdata->Length);
 	}
