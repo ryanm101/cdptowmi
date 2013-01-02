@@ -146,9 +146,12 @@ int clsCDP::processCDPPayload() {
 				clsCDPIP *cdpip = new clsCDPIP();
 				cdpip->Type = cdpdata->Type;
 				cdpip->ProtoType = *(tmp++);
-				cdpip->ProtoLen = *(tmp++);  // FIXME - will not handle protocol lengths > 1
-				cdpip->Protocol = *(tmp++);
-				cdpip->AddrLen = (*(tmp+1)) + *(tmp); // As we are dealing with individual bytes just retrieve in correct ordered instead of calling ntohs().
+				cdpip->ProtoLen = *(tmp++);
+				cdpip->Protocol = new u_char[(int)cdpip->ProtoLen+1];
+				memset(cdpip->Protocol,0,(int)cdpip->ProtoLen+1);
+				memcpy(cdpip->Protocol,tmp,(int)cdpip->ProtoLen);
+				tmp += (int)cdpip->ProtoLen;
+				cdpip->AddrLen = ntohs(*(reinterpret_cast<unsigned short *> (tmp)));
 				tmp+=2; // Move along two places
 				cdpip->Addr = new u_char[cdpip->AddrLen+1];
 				memset(cdpip->Addr, 0, cdpip->AddrLen+1);
@@ -196,9 +199,9 @@ int clsCDP::processCDPPayload() {
 	return 0;
 }
 
-std::string clsCDP::GetProtocol(u_char ID) {
+std::string clsCDP::GetProtocol(u_char *ID) {
 	std::string tmp;
-	switch(ID) {
+	switch(*ID) {
 		case PROTO_NULL:
 			tmp = "NULL";
 			break;
@@ -439,7 +442,7 @@ clsIP::clsIP() { }
 clsIP::clsIP(u_short AddressLength, u_char &Address, u_char Proto) { 
 	AddrLen = AddressLength;
 	Addr = &Address;
-	Protocol = Proto;
+	Protocol = &Proto;
 }
 
 clsIP::~clsIP() { }
@@ -447,22 +450,28 @@ clsIP::~clsIP() { }
 //Methods
 std::string clsIP::getIP() {
 	std::string tmp;
-	if (Protocol == PROTO_IPV4) {
-		u_char t;
-		char t2[4];
-		memset(&t2, 0, 4);
-		int x;
-		for (int i = 0; i < AddrLen; i++) {
-			t = Addr[i];
-			x = (int) t;
-			_itoa_s(x,t2,sizeof(x),10);
-			tmp += t2;
-			if (i < (AddrLen -1)) {
-				tmp += ".";
+	switch (*Protocol) {
+		case PROTO_IPV4: 
+			u_char t;
+			char t2[4];
+			memset(&t2, 0, 4);
+			int x;
+			for (int i = 0; i < AddrLen; i++) {
+				t = Addr[i];
+				x = (int) t;
+				_itoa_s(x,t2,sizeof(x),10);
+				tmp += t2;
+				if (i < (AddrLen -1)) {
+					tmp += ".";
+				}
 			}
-		}
-	} else {
-		tmp = "Unknown - Not IPv4";
+			break;
+		case PROTO_IPV6:
+
+			break;
+		default:
+			tmp = "Unknown";
+			break;
 	}
 	return tmp;
 }
@@ -516,8 +525,6 @@ void clsMAC::extractMAC(u_char *MACOffset) {
 
 // Constructors & Destructor
 clsCDPIP::clsCDPIP() {}
-
-clsCDPIP::clsCDPIP(u_short AddressLength, u_char &Address, u_char Proto) {}
 
 clsCDPIP::~clsCDPIP() {}
 
