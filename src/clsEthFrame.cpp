@@ -45,11 +45,9 @@ int clsFRAME::processLLCHeader() {
 	SSAP = *(tmp++);
 	ConField = *(tmp++);
 
-	for (int i = 0; i<3; i++) {
-			OrgCode[i] = *(tmp++);
-	}
-	OrgCode[3] = '\0';
-
+	memset(OrgCode,0, sizeof(OrgCode) * 3);
+	memcpy(OrgCode,tmp,sizeof(OrgCode) * 3);
+	
 	PID = ntohs(*(reinterpret_cast<u_short *> (tmp)));
 
 	return 0;
