@@ -94,7 +94,7 @@ class clsCDP: public clsFRAME {
 		int processCDPHeader();
 		int processCDPPayload();
 		int processType(u_short datatype, u_short len, u_char *data);
-		std::string GetProtocol(u_char ID);
+		std::string GetProtocol(u_char *ID);
 };
 
 class clsCDPData {
@@ -113,7 +113,7 @@ class clsIP {
 	public:
 		u_short AddrLen;	// 2 bytes
 		u_char *Addr;		// 4 bytes
-		u_char Protocol;	// 1 byte
+		u_char *Protocol;	// Variable (min 1 byte)
 
 	public:
 		clsIP();
@@ -130,7 +130,6 @@ class clsCDPIP: public clsIP {
 		
 	public:
 		clsCDPIP();
-		clsCDPIP(u_short AddressLength, u_char &Address, u_char Proto);
 		~clsCDPIP();
 };
 
