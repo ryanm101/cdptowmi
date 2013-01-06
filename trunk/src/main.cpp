@@ -37,17 +37,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	wmi->_debug_ = _debug_;
 	wmi->setClassName(cname);
 
-	// REPLACE ME WITH COMMANDLINE OPTION
-	std::string nicname;
-	nicname = "Local Area Connection";
-	//nicname = "Lgas";
-
 	if (args["InterfaceName"].length() > 0) {
 		wmi->getNICs(args["InterfaceName"]);
 	} else {
 		wmi->getNICs();
 	}
-	
+
 	if (_debug_) system("Pause");
 
 	clsDump *Dump = new clsDump();

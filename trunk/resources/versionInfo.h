@@ -4,7 +4,7 @@
 #define PRODUCT_WEB_SITE "http://ninet.org"
 
 #ifndef VERSION
-#define VERSION         "0.0.0.3"
+	#define VERSION         "0.0.0.3"
 #endif
 
 #define FILE_VERSION	VERSION
