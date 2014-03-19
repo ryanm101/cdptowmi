@@ -3,6 +3,7 @@
 
 #define _WIN32_DCOM
 
+#include "clslogger.h"
 #include "clsEthFrame.h"
 #include "utility.h"
 #include <pcap.h>
@@ -21,8 +22,10 @@ class clsWMI {
 	// Variables
 	public:
 		bool _debug_;
-
+        
 	private:
+        bool _log_;
+        std::string logfile;
 		IWbemServices* pSvc;
 		IWbemLocator* pLoc;
 		IWbemContext* pCtx;
@@ -45,6 +48,7 @@ class clsWMI {
 		void getNICs(std::string name);
 		void getNICs();
 		std::list<std::string> getNICGUID();
+        void EnableLogging(std::string lf);
 
 	private:
 		void Query(std::string strqry, std::string arrProp[]);

@@ -11,6 +11,7 @@
 #define ARG_NIC_INT		'i' // NIC Interface to listen on.
 #define ARG_NIC_NAME	'c' // NIC Name
 #define ARG_DRYRUN		'w' // Gathers the info but does not touch WMI, should be used with -d
+#define ARG_LOG			'l' // Log to file
 
 /* CDP info Retrieval - Not yet implemented.
 #define CDP_ALL			'a' // Dump Everything from CDP to WMI instead of just select data.
@@ -32,9 +33,10 @@ void DisplayHelp() {
 	printf("\t-c '<Connection Name>'	Name of the Network Interface to use for\n\t\t\t\tcapture\n");
 	printf("\t-i <i>	\t\tNumber of the interface to use for capture\n");
 	printf("\t-w	\t\tProgram will execute and read in CDP Packets\n\t\t\t\tbut will not write to WMI\n\t\t\t\tfor best results use alongside '-d'\n");
+	printf("\t-l <filename> \t Log to file.");
 }
 
-void processargs(int cargs, char** vargs, bool _debug_,map<string,string> &arg) {
+void processargs(int cargs, char** vargs, bool _debug_, bool _log_, map<string,string> &arg) {
 	if (_debug_) printf("Number of Arguments: %d\n",cargs);
 	if (cargs > 1 ) { // Process the arguments
 		for(int i=1;i<cargs;i++) {
@@ -62,6 +64,13 @@ void processargs(int cargs, char** vargs, bool _debug_,map<string,string> &arg) 
 					i++;
 					arg["offlinefile"] = vargs[i];
 					break;
+                case ARG_LOG:
+                    i++;
+                    if (vargs[i] != NULL) {
+                        arg["logfile"] = vargs[i];
+                    }
+                    if ((arg["logfile"] == "") && (_log_)) arg["logfile"] = "c:\\tmp\\cdptowmi.log";
+                    break;
 				default:
 					printf("Unknown paramter '%s'\n", vargs[i]);
 					DisplayHelp();

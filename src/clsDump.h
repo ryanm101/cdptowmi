@@ -2,6 +2,7 @@
 #define __clsDump_H_
 
 #include "clsEthFrame.h"
+#include "clslogger.h"
 
 #include <pcap.h>
 #include <WinSock.h>
@@ -19,6 +20,8 @@ class clsDump {
 	private:
 		pcap_if_t *alldevs; //List of all network adapators
 		pcap_if_t *conDevs; // Network adaptors with an active connection
+        bool _log_;
+        std::string logfile;
 
 	public:
 		std::list<clsCDP*> lstCDP;	//List of all CDP Packets captured & processed.
@@ -33,6 +36,7 @@ class clsDump {
 		~clsDump();
 		void listen();
 		void ReadDump(std::string fname);
+        void EnableLogging(std::string lf);
 
 	private:
 		int getAdaptors();

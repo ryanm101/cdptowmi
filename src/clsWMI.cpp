@@ -3,12 +3,20 @@
 clsWMI::clsWMI() {
 	intInstIndex = 0;
 	clsWMI::ConnectToWMI();
+    logfile = "";
+    _log_ = false;
+    _debug_ = false;
 };
 
 clsWMI::~clsWMI() {
     pSvc->Release();
     pLoc->Release();     
     CoUninitialize();
+}
+
+void clsWMI::EnableLogging(std::string lf) {
+    logfile = lf;
+    _log_ = true;
 }
 
 void clsWMI::setClassName(wchar_t *clsname) {
@@ -21,7 +29,8 @@ int clsWMI::ConnectToWMI() {
     // Initialize COM.
     hres =  CoInitializeEx(0, COINIT_MULTITHREADED); 
     if (FAILED(hres)) {
-        if (_debug_) printf("Failed to initialize COM library - %X\n", hres);
+        if (_debug_) printf(format_error("Failed to initialize COM library - %X\n", hres).c_str());
+        if (_log_) clslogger::log(format_error("clsWMI: ConnectToWMI(), Failed to initialize COM library - ", hres).c_str(),logfile);
         return 1;
     }
 
@@ -41,6 +50,7 @@ int clsWMI::ConnectToWMI() {
                       
     if (FAILED(hres)) {
 		if (_debug_) printf("Failed to initialize security - %X\n", hres);
+        if (_log_) clslogger::log(format_error("clsWMI: ConnectToWMI(), Failed to initialize security - ", hres).c_str(),logfile);
         CoUninitialize();
         return 1;
     }
@@ -55,6 +65,7 @@ int clsWMI::ConnectToWMI() {
  
     if (FAILED(hres)) {
 		if (_debug_) printf("Failed to create IWbemLocator object - %X\n", hres);
+        if (_log_) clslogger::log(format_error("clsWMI: ConnectToWMI(), Failed to create IWbemLocator - ", hres).c_str(),logfile);
         CoUninitialize();
         return 1;
     }
@@ -78,12 +89,14 @@ int clsWMI::ConnectToWMI() {
     
     if (FAILED(hres)) {
 		if (_debug_) printf("Failed to connect - %X\n", hres);
+        if (_log_) clslogger::log(format_error("clsWMI: ConnectToWMI(), Failed to connect - ", hres).c_str(),logfile);
         pLoc->Release();     
         CoUninitialize();
         return 1;
     }
 
 	if (_debug_) printf("Connected to ROOT\\CIMV2 WMI namespace.\n");
+    if (_log_) clslogger::log("clsWMI: Connected to ROOT\\CIMV2 WMI namespace.",logfile);
 	return 0;
 }
 
@@ -91,12 +104,14 @@ void clsWMI::getNICs(std::string name) {
 	std::string strqry = "SELECT * FROM Win32_NetworkAdapter WHERE NetEnabled = True AND NetConnectionID like '";
 	strqry.append(name);
 	strqry.append("'");
+    if (_log_) clslogger::log("clsWMI: getNICs(), strqry: "+ strqry ,logfile);
 	std::string arrFields[] = {"NetConnectionID","Name","GUID"};
 	Query(strqry,arrFields);
 }
 
 void clsWMI::getNICs() {
 	std::string strqry = "SELECT * FROM Win32_NetworkAdapter WHERE NetEnabled = True";
+    if (_log_) clslogger::log("clsWMI: getNICs(), strqry: "+ strqry ,logfile);
 	std::string arrFields[] = {"NetConnectionID","Name","GUID"};
 	Query(strqry,arrFields);
 }
@@ -117,6 +132,7 @@ void clsWMI::Query(std::string strqry, std::string arrProp[]) {
     
     if (FAILED(hres)) {
         printf("Query for processes failed. Error code = %X\n", hres);
+        if (_log_) clslogger::log(format_error("clsWMI: Query(), Query for processes failed. Error code = ", hres).c_str(),logfile);
         pSvc->Release();
         pLoc->Release();     
         CoUninitialize();
@@ -161,6 +177,7 @@ std::list<std::string> clsWMI::getNICGUID() {
 		map_str tmp = *it;
 		mpit = tmp.find("GUID");
 		GUIDList.push_back(mpit->second);
+        if (_log_) clslogger::log("clsWMI: getNICGUID(), GUID: " + mpit->second,logfile);
 	}
 	return GUIDList;
 }
@@ -175,11 +192,12 @@ int clsWMI::DeleteClass() {
 		WBEM_FLAG_RETURN_IMMEDIATELY,
 		pCtx,
 		&pResult);
-
+    if (_log_) clslogger::log("clsWMI: DeleteClass()",logfile);
 	return 0;
 }
 
 int clsWMI::CreateClass() {
+  if (_log_) clslogger::log("clsWMI: CreateClass()",logfile);
   IWbemClassObject *pNewClass = 0;
   pCtx = 0;
   pResult = 0;
@@ -243,6 +261,7 @@ int clsWMI::CreateClass() {
 }
 
 void clsWMI::CreateInstance(clsCDP *cdp) {
+    if (_log_) clslogger::log("clsWMI: CreateInstance()",logfile);
 	instProperties = new std::string[3];
 	dt = cdp->getTS();
 	
@@ -250,12 +269,15 @@ void clsWMI::CreateInstance(clsCDP *cdp) {
 		switch(it->Type) {
 			case PLATFORM:
 				instProperties[0] = it->To_str();
+                if (_log_) clslogger::log("clsWMI: Platform: " + it->To_str(),logfile);
 				break;
 			case DEVICEID:
 				instProperties[1] = it->To_str();
+                if (_log_) clslogger::log("clsWMI: DeviceID: " + it->To_str(),logfile);
 				break;
 			case PORTID:
 				instProperties[2] = it->To_str();
+                if (_log_) clslogger::log("clsWMI: PortID: " + it->To_str(),logfile);
 				break;
 			default:
 				break;
@@ -265,6 +287,7 @@ void clsWMI::CreateInstance(clsCDP *cdp) {
 }
 
 int clsWMI::pCreateInstance() {
+    if (_log_) clslogger::log("clsWMI: pCreateInstance()",logfile);
 	pCtx = 0;
 	pResult = 0;
     IWbemClassObject *pNewInstance = 0;

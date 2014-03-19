@@ -93,6 +93,7 @@
     <ClInclude Include="..\src\CDPTypeList.h" />
     <ClInclude Include="..\src\clsDump.h" />
     <ClInclude Include="..\src\clsEthFrame.h" />
+    <ClInclude Include="..\src\clslogger.h" />
     <ClInclude Include="..\src\clsWMI.h" />
     <ClInclude Include="..\src\displaymaps.h" />
     <ClInclude Include="..\src\guicon.h" />
@@ -107,6 +108,7 @@
     <ClCompile Include="..\src\clsEthFrame.cpp" />
     <ClCompile Include="..\src\clsWMI.cpp" />
     <ClCompile Include="..\src\guicon.cpp" />
+    <ClCompile Include="..\src\clslogger.cpp" />
     <ClCompile Include="..\src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
