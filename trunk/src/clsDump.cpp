@@ -3,10 +3,17 @@
 clsDump::clsDump() {
 	nic_int = -1;
 	_debug_ = false;
+    logfile = "";
+    _log_ = false;
 	use_guid_list = false;
 }
 
 clsDump::~clsDump() {}
+
+void clsDump::EnableLogging(std::string lf) {
+    logfile = lf;
+    _log_ = true;
+}
 
 void clsDump::listen() {
 	pcap_if_t *d;

@@ -1,5 +1,8 @@
 CDPtoWMI Changelog
 
+0.0.0.4:
+- Added Logger class and code to log to file
+
 0.0.0.3:
 - Added Power Available to debug output
 - Added Capabilities, Duplex, IP address, Management IP,  Native VLAN and Protocol Hello to debug output

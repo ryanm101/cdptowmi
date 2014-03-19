@@ -7,7 +7,7 @@
 #include "clsWMI.h"
 #include "guicon.h"
 #include "arglist.h"
-
+#include "clslogger.h"
 
 #include <windows.h>
 #include <stdlib.h>

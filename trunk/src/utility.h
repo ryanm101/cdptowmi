@@ -2,6 +2,17 @@
 #define __UTILITY_H_
 
 #include <string>
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+
+inline std::string format_error(std::string str, unsigned __int32 hr) {
+  // Code taken from
+  // http://social.msdn.microsoft.com/Forums/vstudio/en-US/0016266c-07e4-44b5-a3ec-1a8e106cf57b/convert-hresult-hex-error-code-to-string?forum=vcgeneral
+  std::stringstream ss;
+  ss << str << std::hex << hr << std::endl;
+  return ss.str();
+}
 
 inline std::wstring ctow(const char* src) {
     return std::wstring(src, src + strlen(src));
